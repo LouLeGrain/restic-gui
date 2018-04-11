@@ -1,0 +1,14 @@
+body {
+    background: #333 url('/static/images/bg.png');
+    font-family: Lucida Grande, Verdana, Sans-serif;
+    font-size: 14px;
+    color: #4F5155;
+}
+
+.main {
+    background-color: #ffffff;
+    min-height: 400px;
+    padding: 2em;
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
