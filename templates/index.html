@@ -1,44 +1,40 @@
 {{define "content"}}
 <div id="indexApp">
-    <h1>{{.Title}}</h1>
-
+    <h2>{{.Title}}</h2>
     <div id="indexApp"></div>
-
     <noscript><h2>Javascript needs to be enabled to send the payment!</h2></noscript>
-
     <div class="row">
-        <div class="col-md-3">
-            <ul class="list-group">
-            {{ range $key, $value := .Repos }}
-                <li id="idx_{{$key}}" class="list-group-item">
-                    <div>{{ $value.Path }}</div>
-                    <ul>
-                    {{ range $k, $v := $value.BackupIds }}
-                        <li>
-                        {{$v}}
-                        </li>
-                    {{end}}
-                    </ul>
-                </li>
-            {{end}}
-            </ul>
+        <div class="col-md-4">
+        {{ range $key, $value := .Repos }}
+            <div class="list-group repos">
+                <a href="" class="list-group-item  list-group-item-action list-group-item-primary"
+                   id="repo_{{$key}}">Backup: {{ $value.Path }}</a>
+                <div class="list-group backups" style="margin-bottom: 1em">
+                {{ range $k, $v := $value.Backups }}
+                    <a href="" class="list-group-item backup list-group-item-action list-group-item-primary"
+                       id="bu_{{$k}}">Source: {{$v.Source}}</a>
+                    <div class="list-group snapshots"></div>
+                {{end}}
+                </div>
+            </div>
+        {{end}}
         </div>
-
-        <div class="col-md-3">
-            <ul class="list-group">
-            {{ range $key, $value := .Backups }}
-                <li id="idx_{{$key}}" class="list-group-item">
-                {{ $value.Name }}
-                </li>
-            {{end}}
-            </ul>
+        <div class="col-md-8">
+            Details
         </div>
     </div>
-
 </div>
 
 <script type="text/javascript">
     $(document).ready(function () {
+
+        $('a').click(function (e) {
+            e.preventDefault()
+            console.log($(this).attr('id'))
+            $(this).tab('show')
+
+        })
+
         var backups = JSON.parse('{{.Data}}');
         console.log(backups)
         /*

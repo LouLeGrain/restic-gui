@@ -25,9 +25,9 @@ type Backup struct {
 	Status  int    `json:"status"`
 }
 
-type Repos map[int]Repository
-
 type Backups map[int]Backup
+
+type Repos map[int]Repository
 
 func GetRepositories() (Repos, error) {
 	var items = map[int]Repository{}
@@ -55,7 +55,7 @@ func GetRepositories() (Repos, error) {
 			password,
 			kind,
 			data,
-			[]string (strings.Split(backups, ",")),
+			[]string(strings.Split(backups, ",")),
 			nil,
 			false}
 		items[item.Id] = item
@@ -67,7 +67,6 @@ func GetBackups() (Backups, error) {
 	var items = map[int]Backup{}
 	rows, err := Db.Query("SELECT b.backup_id, b.created, b.repository_id, b.name, b.source, b.status FROM backups AS b")
 	CheckErr(err)
-
 	var backup_id int
 	var created string
 	var repository_id int
