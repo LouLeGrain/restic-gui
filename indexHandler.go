@@ -34,5 +34,4 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 func mergeBackup(rep Repositories, bu Backups) (Repositories, error) {
 
 	return rep, nil
-
 }
