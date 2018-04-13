@@ -17,7 +17,6 @@ type PageData struct {
 	Title   string
 	Err     string
 	Message string
-	Repos   models.Repos
 	Backups models.Backups
 	Data    string
 }

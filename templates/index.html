@@ -4,22 +4,23 @@
     <div id="indexApp"></div>
     <noscript><h2>Javascript needs to be enabled to send the payment!</h2></noscript>
     <div class="row">
-        <div class="col-md-4">
-        {{ range $key, $value := .Repos }}
-            <div class="list-group repos">
-                <a href="" class="list-group-item  list-group-item-action list-group-item-primary"
-                   id="repo_{{$key}}">Backup: {{ $value.Path }}</a>
-                <div class="list-group backups" style="margin-bottom: 1em">
-                {{ range $k, $v := $value.Backups }}
-                    <a href="" class="list-group-item backup list-group-item-action list-group-item-primary"
-                       id="bu_{{$k}}">Source: {{$v.Source}}</a>
-                    <div class="list-group snapshots"></div>
-                {{end}}
-                </div>
+        <div class="col-md-3">
+            <div class="list-group">
+            {{ range $k, $bu := .Backups }}
+                <a href="#" id="bu_{{$k}}"
+                   class="list-group-item list-group-item-action flex-column align-items-start">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">{{$bu.Name}}</h6>
+                        <small>{{$bu.Type}} backup</small>
+                    </div>
+                    <p class="mb-1"></p>
+                    <small>Source: {{$bu.Source}}<br/>Destination: {{ $bu.RepoPath }}</small>
+                </a>
+                <div id="sn_{{$k}}" class="list-group snapshots" style="display: none">&nbsp;</div>
+            {{end}}
             </div>
-        {{end}}
         </div>
-        <div class="col-md-8">
+        <div class="col-md-9">
             Details
         </div>
     </div>
