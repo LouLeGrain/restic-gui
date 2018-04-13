@@ -1,6 +1,8 @@
 package models
 
-import "simbookee/restic-gui/utils"
+import (
+	"simbookee/restic-gui/utils"
+)
 
 type Backup struct {
 	Id       int    `json:"id"`
@@ -17,10 +19,11 @@ type Backups map[int]Backup
 
 func GetBackups() (Backups, error) {
 	var items = map[int]Backup{}
-	query := "SELECT b.backup_id, b.created, b.repository_id, r.path, r.type, b.name, b.source, b.status FROM backups AS b JOIN repositories AS r USING(repository_id)"
+	query := "SELECT b.backup_id, b.created, b.repository_id, r.path, r.type, b.name, b.source, b.status " +
+		"FROM backups AS b JOIN repositories AS r USING(repository_id) ORDER BY b.repository_id, b.name"
 
 	rows, err := Db.Query(query)
-	CheckErr(err)
+	utils.CheckErr(err, "fatal")
 	var backup_id int
 	var created string
 	var repository_id int
@@ -34,7 +37,7 @@ func GetBackups() (Backups, error) {
 	for rows.Next() {
 		var item Backup
 		err = rows.Scan(&backup_id, &created, &repository_id, &path, &repoType, &name, &source, &status)
-		CheckErr(err)
+		utils.CheckErr(err, "fatal")
 		item = Backup{
 			backup_id,
 			created,

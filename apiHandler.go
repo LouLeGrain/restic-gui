@@ -2,13 +2,56 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"fmt"
+	"github.com/gorilla/mux"
+	"log"
 	"net/http"
-	"os"
+	"strconv"
 )
 
 func ApiHandler(w http.ResponseWriter, r *http.Request) {
-	type post struct {
+	v := mux.Vars(r)
+	method := v["Method"]
+	id, _ := strconv.Atoi(v["Id"])
+
+	var status int
+	var data interface{}
+
+	switch method {
+	case "Snapshots":
+		data, err := Snapshots(id)
+		if err != nil {
+			status = 400
+		}
+		log.Println(data)
+	case "Snapshot":
+		data, err := Snapshot(id)
+		if err != nil {
+			status = 400
+		}
+		log.Println(data)
+	}
+
+	Response := JsonResponse{status, data}
+
+	json.NewEncoder(w).Encode(Response)
+}
+
+func Snapshots(id int) (interface{}, error) {
+	var data interface{}
+	fmt.Println(id)
+
+	return data, nil
+}
+
+func Snapshot(id int) (interface{}, error) {
+	var data interface{}
+	fmt.Println(id)
+
+	return data, nil
+}
+
+/*	type post struct {
 		Path string
 	}
 	var p post
@@ -16,21 +59,5 @@ func ApiHandler(w http.ResponseWriter, r *http.Request) {
 	//fmt.Print(string(b))
 
 	json.Unmarshal(b, &p)
-	exists, _ := exists(p.Path)
-	w.Header().Set("Content-Type", "application/json")
-
-	response := JsonResponse{200, exists}
-
-	json.NewEncoder(w).Encode(response)
-}
-
-func exists(path string) (bool, error) {
-	_, err := os.Stat(path)
-	if err == nil {
-		return true, nil
-	}
-	if os.IsNotExist(err) {
-		return false, nil
-	}
-	return true, err
-}
+	exists, _ := utils.Exists(p.Path)
+	w.Header().Set("Content-Type", "application/json")*/

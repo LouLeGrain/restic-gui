@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"simbookee/restic-gui/models"
+	"simbookee/restic-gui/utils"
 )
 
 const PORT = "8000"
@@ -17,6 +18,7 @@ type PageData struct {
 	Title   string
 	Err     string
 	Message string
+	Repos   models.Repos
 	Backups models.Backups
 	Data    string
 }
@@ -28,13 +30,16 @@ type JsonResponse struct {
 
 func main() {
 	_, err := models.GetDb(DB_TYPE)
-	checkErr(err)
+	utils.CheckErr(err, "fatal")
 
 	r := mux.NewRouter()
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
-	r.HandleFunc("/", IndexHandler).Methods("GET")
-	//r.HandleFunc("/api/check/path", ApiHandler).Methods("POST")
 	r.HandleFunc("/test", TestHandler).Methods("GET")
+
+	r.HandleFunc("/", IndexHandler).Methods("GET")
+	r.HandleFunc("/api/backup/{backup_id}/snapshots", SnapShotsHandler).Methods("GET")
+	r.HandleFunc("/api/snapshot/{snapshot_id}/files/", SnapShotHandler).Methods("GET")
+
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(getPort(), r))
 }
@@ -73,8 +78,3 @@ func getPort() string {
 	return ":" + PORT
 }
 
-func checkErr(err error) {
-	if err != nil {
-		panic(err)
-	}
-}

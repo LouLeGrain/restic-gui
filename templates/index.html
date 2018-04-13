@@ -1,13 +1,14 @@
 {{define "content"}}
 <div id="indexApp">
-    <h2>{{.Title}}</h2>
+    <h2>
+        <button id="new" type="button" class="btn btn-secondary">+</button>&nbsp;&nbsp;&nbsp;{{.Title}}</h2>
     <div id="indexApp"></div>
     <noscript><h2>Javascript needs to be enabled to send the payment!</h2></noscript>
     <div class="row">
         <div class="col-md-3">
             <div class="list-group">
-            {{ range $k, $bu := .Backups }}
-                <a href="#" id="bu_{{$k}}"
+            {{ range $_, $bu := .Backups }}
+                <a href="#" backup-id="{{$bu.Id}}"
                    class="list-group-item list-group-item-action flex-column align-items-start">
                     <div class="d-flex w-100 justify-content-between">
                         <h6 class="mb-1">{{$bu.Name}}</h6>
@@ -16,7 +17,7 @@
                     <p class="mb-1"></p>
                     <small>Source: {{$bu.Source}}<br/>Destination: {{ $bu.RepoPath }}</small>
                 </a>
-                <div id="sn_{{$k}}" class="list-group snapshots" style="display: none">&nbsp;</div>
+                <div id="sn_{{$bu.Id}}" class="list-group snapshots" style="display: none">&nbsp;</div>
             {{end}}
             </div>
         </div>
@@ -31,7 +32,7 @@
 
         $('a').click(function (e) {
             e.preventDefault()
-            console.log($(this).attr('id'))
+            console.log($(this).attr('backup-id'))
             $(this).tab('show')
 
         })

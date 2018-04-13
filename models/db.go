@@ -5,6 +5,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"os"
+	"simbookee/restic-gui/utils"
 )
 
 const DB_PATH = "./backups.db"
@@ -16,7 +17,7 @@ func GetDb(t string) (bool, error) {
 	switch t {
 	case "sqlite":
 		_, err := sqliteConnect()
-		CheckErr(err)
+		utils.CheckErr(err, "")
 	}
 
 	return true, nil
@@ -74,11 +75,11 @@ func sqliteMigrate() {
 		`
 
 	_, err := Db.Exec(sql)
-	CheckErr(err)
+	utils.CheckErr(err, "")
 	Db.Close()
 
 	_, err = sqliteConnect()
-	CheckErr(err)
+	utils.CheckErr(err, "")
 }
 
 func CheckErr(err error) {
