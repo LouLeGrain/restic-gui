@@ -23,7 +23,7 @@ func GetBackups() (Backups, error) {
 		"FROM backups AS b JOIN repositories AS r USING(repository_id) ORDER BY b.repository_id, b.name"
 
 	rows, err := Db.Query(query)
-	utils.CheckErr(err, "fatal")
+	utils.Check(err, "fatal")
 	var backup_id int
 	var created string
 	var repository_id int
@@ -37,7 +37,7 @@ func GetBackups() (Backups, error) {
 	for rows.Next() {
 		var item Backup
 		err = rows.Scan(&backup_id, &created, &repository_id, &path, &repoType, &name, &source, &status)
-		utils.CheckErr(err, "fatal")
+		utils.Check(err, "fatal")
 		item = Backup{
 			backup_id,
 			created,

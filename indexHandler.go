@@ -11,17 +11,18 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 
 	pageData := PageData{Title: "Restic Backup"}
 	repositories, err := models.GetRepositories()
-	utils.CheckErr(err, "")
+	utils.Check(err, "")
 	backups, err := models.GetBackups()
-	utils.CheckErr(err, "")
+	utils.Check(err, "")
 	jsonRepos, err := json.Marshal(repositories)
-	utils.CheckErr(err, "")
+	utils.Check(err, "")
 	jsonBus, err := json.Marshal(backups)
-	utils.CheckErr(err, "")
-
+	utils.Check(err, "")
+	_, err = utils.CheckProgExists("restic")
 	if err != nil {
 		pageData.Err = "System Error. Please contact support at support@simbookee.com"
 	}
+
 	pageData.Repos = repositories
 	pageData.Backups = backups
 	pageData.Data = "{\"repositories\":" + string(jsonRepos) + ",\"backups\":" + string(jsonBus) + "}"

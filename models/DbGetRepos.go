@@ -18,7 +18,7 @@ type Repos map[int]Repository
 func GetRepositories() (Repos, error) {
 	var items = map[int]Repository{}
 	rows, err := Db.Query("SELECT r.repository_id, r.created, r.path, r.password, r.type, r.data FROM repositories AS r ;")
-	utils.CheckErr(err, "fatal")
+	utils.Check(err, "fatal")
 
 	var repository_id int
 	var created string
@@ -31,7 +31,7 @@ func GetRepositories() (Repos, error) {
 	for rows.Next() {
 		var item Repository
 		err = rows.Scan(&repository_id, &created, &path, &password, &kind, &data)
-		utils.CheckErr(err, "fatal")
+		utils.Check(err, "fatal")
 		item = Repository{
 			repository_id,
 			created,

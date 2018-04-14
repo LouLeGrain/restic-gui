@@ -17,7 +17,7 @@ func GetDb(t string) (bool, error) {
 	switch t {
 	case "sqlite":
 		_, err := sqliteConnect()
-		utils.CheckErr(err, "")
+		utils.Check(err, "")
 	}
 
 	return true, nil
@@ -75,14 +75,14 @@ func sqliteMigrate() {
 		`
 
 	_, err := Db.Exec(sql)
-	utils.CheckErr(err, "")
+	utils.Check(err, "")
 	Db.Close()
 
 	_, err = sqliteConnect()
-	utils.CheckErr(err, "")
+	utils.Check(err, "")
 }
 
-func CheckErr(err error) {
+func Check(err error) {
 	if err != nil {
 		log.Printf("%+v\n", err)
 		panic(err)

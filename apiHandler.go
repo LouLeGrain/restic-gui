@@ -59,5 +59,5 @@ func Snapshot(id int) (interface{}, error) {
 	//fmt.Print(string(b))
 
 	json.Unmarshal(b, &p)
-	exists, _ := utils.Exists(p.Path)
+	exists, _ := utils.CheckFileExists(p.Path)
 	w.Header().Set("Content-Type", "application/json")*/

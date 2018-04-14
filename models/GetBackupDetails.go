@@ -24,7 +24,7 @@ func GetBackupDetails(id int) (map[string]string, error) {
 	case err == sql.ErrNoRows:
 		err = errors.New("Bad request for id: " + strconv.Itoa(id))
 	case err != nil:
-		utils.CheckErr(err, "fatal")
+		utils.Check(err, "fatal")
 	default:
 		m["source"] = source
 		m["destination"] = path
