@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"os"
 	"os/exec"
 	"simbookee/restic-gui/models"
 	"simbookee/restic-gui/utils"
@@ -48,7 +49,8 @@ func SnapShotsHandler(w http.ResponseWriter, r *http.Request) {
 	opt := Opt{"path": credentials["source"]}
 	snapshots, err := GetSnapshots(opt)
 	utils.Check(err, "")
-
+	err = os.Remove(PassFile)
+	utils.Check(err, "")
 	response.Data = snapshots
 	json.NewEncoder(w).Encode(response)
 }
