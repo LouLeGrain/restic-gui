@@ -82,25 +82,26 @@ func getPort() string {
 	return ":" + PORT
 }
 
-//todo
-//restic -r /Users/andi/backup/test init
-//restic -r /tmp/backup backup ~/work
-//restic -r /Users/andi/backup/test snapshots
-//restic -r /tmp/backup snapshots --path="/srv" (--host luigi , )
-//restic -r /tmp/backup diff 5845b002 2ab627a6
-//restic -r /tmp/backup restore 79766175 --target /tmp/restore-work
-//cat mypassword > repo_pwd.txt
-//restic -r /Volumes/restic/jussi -p repo_pwd.txt backup --exclude-file exclude.txt ~/Music/GarageBand
-//restic -r /tmp/backup backup --tag projectX --tag foo --tag bar ~/work
-//restic -r /tmp/backup restore latest --target /tmp/restore-art --path "/home/art" --host luigi
-//restic -r /tmp/backup restore 79766175 --target /tmp/restore-work --include /work/foo
-//restic -r /tmp/backup mount /mnt/restic
-//restic -r /tmp/backup dump latest production.sql | mysql
-//restic -r /tmp/backup forget bdbd3439
-//restic -r /tmp/backup prune
-//restic forget --keep-last 1 --prune
-//restic forget --tag foo --keep-last 1
-//restic forget --tag foo --tag bar --keep-last 1
-//restic forget --tag foo,tag bar --keep-last 1
-//forget --keep-daily 7 --keep-weekly 5 --keep-monthly 12 --keep-yearly 75
-//restic -r /tmp/backup key list
+/*todo
+restic -r /Users/andi/backup/test init
+restic -r /tmp/backup backup ~/work
+restic -r /Users/andi/backup/test snapshots
+restic -r /tmp/backup snapshots --path="/srv" (--host luigi , )
+restic -r /tmp/backup diff 5845b002 2ab627a6
+restic -r /tmp/backup restore 79766175 --target /tmp/restore-work
+cat mypassword > repo_pwd.txt
+restic -r /Volumes/restic/jussi -p repo_pwd.txt backup --exclude-file exclude.txt ~/Music/GarageBand
+restic -r /tmp/backup backup --tag projectX --tag foo --tag bar ~/work
+restic -r /tmp/backup restore latest --target /tmp/restore-art --path "/home/art" --host luigi
+restic -r /tmp/backup restore 79766175 --target /tmp/restore-work --include /work/foo
+restic -r /tmp/backup mount /mnt/restic
+restic -r /tmp/backup dump latest production.sql | mysql
+restic -r /tmp/backup forget bdbd3439
+restic -r /tmp/backup prune
+restic forget --keep-last 1 --prune
+restic forget --tag foo --keep-last 1
+restic forget --tag foo --tag bar --keep-last 1
+restic forget --tag foo,tag bar --keep-last 1
+forget --keep-daily 7 --keep-weekly 5 --keep-monthly 12 --keep-yearly 75
+restic -r /tmp/backup key list
+*/
