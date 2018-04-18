@@ -8,94 +8,148 @@
         <div class="col-md-3">
             <div class="list-group">
             {{ range $_, $bu := .Backups }}
-                <a href="#" backup-id="{{$bu.Id}}"
-                   class="list-group-item list-group-item-action flex-column align-items-start">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h6 class="mb-1">{{$bu.Name}}</h6>
-                        <small>{{$bu.Type}} backup</small>
-                    </div>
-                    <p class="mb-1"></p>
-                    <small>Source: {{$bu.Source}}<br/>Destination: {{ $bu.RepoPath }}</small>
+                <a href="#" class="list-group-item backups" id="bu_{{$bu.Id}}" backup-id="{{$bu.Id}}">
+                    <h6>{{$bu.Name}}</h6>
                 </a>
-                <div id="sn_{{$bu.Id}}" class="list-group snapshots" style="display: none">&nbsp;</div>
+                <div id="sn_{{$bu.Id}}" class="list-group snapshots">
+                    <a href="#" class="list-group-item snapshot" id="bu_{{$bu.Id}}" backup-id="{{$bu.Id}}">
+                        test
+                    </a>
+                    <a href="#" class="list-group-item snapshot" id="bu_{{$bu.Id}}" backup-id="{{$bu.Id}}">
+                        test
+                    </a>
+                </div>
             {{end}}
             </div>
         </div>
-        <div class="col-md-9">
-            Details
+        <div class="col-md-9" class="details">
+            <div class="section" id="backup">
+                <div class="row">
+                    <h5 class="col-md-8" id="bu-name"></h5>
+                    <h5 class="col-md-4"><span class="badge badge-secondary">Change</span></h5>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">Backup started:</div>
+                    <div class="col-md-6" id="bu-created"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">Location:</div>
+                    <div class="col-md-6" id="bu-loc"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">Destination:</div>
+                    <div class="col-md-6" id="repo-path"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3">Storage type:</div>
+                    <div class="col-md-6" id="repo-type"></div>
+                </div>
+            </div>
+            <div class="section" id="files">
+                <h6>Files</h6>
+
+            </div>
         </div>
     </div>
+</div>
 </div>
 
 <script type="text/javascript">
     $(document).ready(function () {
+        $('.section').hide();
+        $('#backup').show();
+        var data = JSON.parse('{{.Data}}');
+        for (var prop in data.backups) {
+            break
+        }
 
-        $('a').click(function (e) {
+        showDeatils(prop)
+
+        $('.backups').click(function (e) {
+            $('.section').hide();
+            $('#backup').show();
             e.preventDefault()
-            console.log($(this).attr('backup-id'))
+            var idx = $(this).attr('backup-id')
             $(this).tab('show')
+            showDeatils(idx)
 
         })
 
-        var backups = JSON.parse('{{.Data}}');
-        console.log(backups)
+        function showDeatils(prop) {
+            $('.snapshots').hide();
+            var bu = data.backups[prop]
+            $('#bu-name').html(bu.name)
+            $('#bu-created').html(bu.created)
+            $('#bu-loc').html(bu.source)
+            $('#repo-path').html(bu.repo_path)
+            $('#repo-type').html(bu.type)
+
+            $('#sn_' + prop).show();
+        }
+
+        function getSnapshots() {
+
+        }
+
+        function checkValidPath(path) {
+            $.ajax({
+                url: "api/check/path",
+                type: 'POST',
+                data: '{"path":"' + path + '"}',
+                dataType: 'json',
+                beforeSend: function (xhr) {
+                    xhr.overrideMimeType("text/plain; charset=x-user-defined")
+                }
+            }).done(function (response) {
+                if (!response.data) {
+                    alert('Not a valid local path');
+                    error.path = "Path error";
+                    return false
+                }
+            });
+            return true
+        }
+
+        $("#formBuPath").blur(function (e) {
+            checkValidPath($(this).val());
+        });
+
         /*
+             showDetail(0);
 
-                showDetail(0);
+             function showDetail(idx) {
+                 var type = backups[idx].repoType;
+                 //console.log(backups[idx])
+                 $('#formBuName').val(backups[idx].backupName);
+                 $('#formBuPath').val(backups[idx].backupPath);
+                 $('#formRepoPath').val(backups[idx].repoPath);
+                 $('#formRepoPasswd').val(backups[idx].repoPasswd);
+                 $("input[name=type][value=" + type + "]").prop("checked", true);
+                 checkValidPath(backups[idx].backupPath);
+             }
 
-                function showDetail(idx) {
-                    var type = backups[idx].repoType;
-                    //console.log(backups[idx])
-                    $('#formBuName').val(backups[idx].backupName);
-                    $('#formBuPath').val(backups[idx].backupPath);
-                    $('#formRepoPath').val(backups[idx].repoPath);
-                    $('#formRepoPasswd').val(backups[idx].repoPasswd);
-                    $("input[name=type][value=" + type + "]").prop("checked", true);
-                    checkValidPath(backups[idx].backupPath);
-                }
 
-                $("#formBuPath").blur(function (e) {
-                    checkValidPath($(this).val());
-                });
+             $('.list-group-item').on('click', function () {
+                 $('.list-group-item').removeClass('active');
+                 $(this).addClass('active');
+                 var idxStr = $(this).attr('id');
+                 idx = idxStr.substring(4, idxStr.length);
+                 showDetail(idx)
+             })
 
-                $('.list-group-item').on('click', function () {
-                    $('.list-group-item').removeClass('active');
-                    $(this).addClass('active');
-                    var idxStr = $(this).attr('id');
-                    idx = idxStr.substring(4, idxStr.length);
-                    showDetail(idx)
-                })
 
-                function checkValidPath(path) {
-                    $.ajax({
-                        url: "api/check/path",
-                        type: 'POST',
-                        data: '{"path":"' + path + '"}',
-                        dataType: 'json',
-                        beforeSend: function (xhr) {
-                            xhr.overrideMimeType("text/plain; charset=x-user-defined")
-                        }
-                    }).done(function (response) {
-                        if (!response.data) {
-                            alert('Not a valid local path');
-                            error.path = "Path error";
-                            return false
-                        }
-                    });
-                    return true
-                }
+             $("#details-form").submit(function (e) {
+                 e.preventDefault();
+                 console.log(error);
+                 saveBuDetails()
+             });
 
-                $("#details-form").submit(function (e) {
-                    e.preventDefault();
-                    console.log(error);
-                    saveBuDetails()
-                });
-
-                function saveBuDetails() {
-                    alert('save')
-                }
-        */
+             function saveBuDetails() {
+                 alert('save')
+             }
+     */
     })
+
 </script>
 
 {{end}}
