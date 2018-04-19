@@ -129,7 +129,7 @@
                     console.log(data.data)
                     var str = ''
                     $.each(data.data, function (idx, val) {
-                        str = '<a href="#" id="' + val.id + '" class="list-group-item sn small">' + val.date + " at " + val.time + '</a>'
+                        str = '<a href="#" id="' + val.id + '" class="list-group-item sn small">' + val.date + '</a>'
                         $('#sn_' + prop).append(str);
                     });
                 }

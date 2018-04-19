@@ -15,11 +15,10 @@ import (
 )
 
 type Row struct {
-	Id   string `json:"id"`
-	Date string `json:"date"`
-	Time string `json:"time"`
-	Host string `json:"host"`
-	Path string `json:"path"`
+	Id       string `json:"id"`
+	DateTime string `json:"date"`
+	Host     string `json:"host"`
+	Path     string `json:"path"`
 }
 
 type Rows []Row
@@ -72,14 +71,12 @@ func GetSnapshots(opt map[string]string) (Rows, error) {
 			row := Row{}
 			fields := strings.Fields(v)
 			row.Id = fields[0]
-			row.Date = fields[1]
-			row.Time = fields[2]
+			row.DateTime = fields[1] + " at " + fields[2]
 			row.Host = fields[3]
 			row.Path = fields[4]
 			rows = append(rows, row)
 		}
 	}
-
 	for left, right := 0, len(rows)-1; left < right; left, right = left+1, right-1 {
 		rows[left], rows[right] = rows[right], rows[left]
 	}
