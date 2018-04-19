@@ -11,22 +11,16 @@
                 <a href="#" class="list-group-item backups" id="bu_{{$bu.Id}}" backup-id="{{$bu.Id}}">
                     <h6>{{$bu.Name}}</h6>
                 </a>
-                <div id="sn_{{$bu.Id}}" class="list-group snapshots">
-                    <a href="#" class="list-group-item snapshot" id="bu_{{$bu.Id}}" backup-id="{{$bu.Id}}">
-                        test
-                    </a>
-                    <a href="#" class="list-group-item snapshot" id="bu_{{$bu.Id}}" backup-id="{{$bu.Id}}">
-                        test
-                    </a>
-                </div>
+                <div id="sn_{{$bu.Id}}" class="list-group snapshots"></div>
             {{end}}
             </div>
         </div>
         <div class="col-md-9" class="details">
             <div class="section" id="backup">
                 <div class="row">
-                    <h5 class="col-md-8" id="bu-name"></h5>
-                    <h5 class="col-md-4"><span class="badge badge-secondary">Change</span></h5>
+                    <h5 class="col-md-9" id="bu-name"></h5>
+                    <h5 class="col-md-2"><a href="#" class="badge badge-secondary new-bu" id="bu-button"> New
+                        Backup </a></h5>
                 </div>
                 <div class="row">
                     <div class="col-md-3">Backup started:</div>
@@ -35,10 +29,12 @@
                 <div class="row">
                     <div class="col-md-3">Location:</div>
                     <div class="col-md-6" id="bu-loc"></div>
+                    <div class="col-md-2"><a href="#" class="badge badge-secondary"> Change </a></div>
                 </div>
                 <div class="row">
                     <div class="col-md-3">Destination:</div>
                     <div class="col-md-6" id="repo-path"></div>
+                    <div class="col-md-2"><a href="#" class="badge badge-secondary"> Delete </a></div>
                 </div>
                 <div class="row">
                     <div class="col-md-3">Storage type:</div>
@@ -59,23 +55,57 @@
         $('.section').hide();
         $('#backup').show();
         var data = JSON.parse('{{.Data}}');
-        for (var prop in data.backups) {
+        var prop = '';
+
+        for (prop in data.backups) {
             break
         }
 
-        showDeatils(prop)
+        showDeatils()
+
+        $('.new-bu').click(function (e) {
+            createBackup($(this).attr('backup-id'))
+        })
 
         $('.backups').click(function (e) {
             $('.section').hide();
             $('#backup').show();
             e.preventDefault()
-            var idx = $(this).attr('backup-id')
+            prop = $(this).attr('backup-id')
             $(this).tab('show')
-            showDeatils(idx)
+            showDeatils()
 
         })
 
-        function showDeatils(prop) {
+        $(".snapshots").on('click', (function (e) {
+
+                    e.preventDefault()
+                    console.log(e)
+
+                    //alert($(this).attr('id'))
+                    //$(this).addClass(" alert alert-secondary alert-link");
+                })
+        )
+
+        function createBackup(buid) {
+            $.ajax({
+                type: "GET",
+                url: "/api/newsnapshot/" + buid,
+                // The key needs to match your method's input parameter (case-sensitive).
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    if (data.data == true) {
+                        showDeatils()
+                    }
+                },
+                failure: function (errMsg) {
+                    alert(errMsg)
+                }
+            });
+        }
+
+        function showDeatils() {
             $('.snapshots').hide();
             var bu = data.backups[prop]
             $('#bu-name').html(bu.name)
@@ -83,12 +113,29 @@
             $('#bu-loc').html(bu.source)
             $('#repo-path').html(bu.repo_path)
             $('#repo-type').html(bu.type)
-
-            $('#sn_' + prop).show();
+            $('#bu-button').attr('backup-id', prop)
+            getSnapshots(bu)
         }
 
-        function getSnapshots() {
+        function getSnapshots(bu) {
+            var request = $.ajax({
+                dataType: "json",
+                url: "/api/backup/" + bu.id + "/snapshots"
+            });
 
+            request.done(function (data) {
+                $('#sn_' + prop).html('')
+                if (data.status == 200) {
+                    console.log(data.data)
+                    var str = ''
+                    $.each(data.data, function (idx, val) {
+                        str = '<a href="#" id="' + val.id + '" class="list-group-item sn small">' + val.date + " at " + val.time + '</a>'
+                        $('#sn_' + prop).append(str);
+                    });
+                }
+
+                $('#sn_' + prop).show();
+            })
         }
 
         function checkValidPath(path) {
@@ -115,8 +162,6 @@
         });
 
         /*
-             showDetail(0);
-
              function showDetail(idx) {
                  var type = backups[idx].repoType;
                  //console.log(backups[idx])

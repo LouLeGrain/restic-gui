@@ -31,12 +31,10 @@ func SetPassFile(path string, secret string) (string, error) {
 
 func CheckProgExists(name string) (bool, error) {
 	ret := true
-	path, err := exec.LookPath(name)
+	_, err := exec.LookPath(name)
 	if err != nil {
 		fmt.Printf("didn't find '" + name + "' executable\n")
 		ret = false
-	} else {
-		fmt.Printf("'"+name+"' executable is in '%s'\n", path)
 	}
 	return ret, err
 }

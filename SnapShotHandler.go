@@ -2,10 +2,21 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
 func SnapShotHandler(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+
+	fmt.Println(vars)
+
+	route := mux.Route{}
+
+	fmt.Println(route)
+
 	/*
 		type post struct {
 			Path string

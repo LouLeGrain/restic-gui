@@ -80,5 +80,9 @@ func GetSnapshots(opt map[string]string) (Rows, error) {
 		}
 	}
 
+	for left, right := 0, len(rows)-1; left < right; left, right = left+1, right-1 {
+		rows[left], rows[right] = rows[right], rows[left]
+	}
+
 	return rows, err
 }

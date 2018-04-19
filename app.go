@@ -43,6 +43,7 @@ func main() {
 	r.HandleFunc("/", IndexHandler).Methods("GET")
 	r.HandleFunc("/api/backup/{backup_id}/snapshots", SnapShotsHandler).Methods("GET")
 	r.HandleFunc("/api/snapshot/{snapshot_id}/files/", SnapShotHandler).Methods("GET")
+	r.HandleFunc("/api/newsnapshot/{backup_id}", BackupHandler).Methods("GET")
 
 	http.Handle("/", r)
 	log.Fatal(http.ListenAndServe(getPort(), r))
