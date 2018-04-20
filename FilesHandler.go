@@ -3,9 +3,9 @@ package main
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
+	"os"
 	"os/exec"
 	"simbookee/restic-gui/models"
 	"simbookee/restic-gui/utils"
@@ -13,14 +13,15 @@ import (
 	"strings"
 )
 
-func BackupHandler(w http.ResponseWriter, r *http.Request) {
+func FilesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	response := JsonResponse{200, nil}
 
 	v := mux.Vars(r)
-	id, _ := strconv.Atoi(v["backup_id"])
+	snid := v["snapshot_id"]
+	buid, _ := strconv.Atoi(v["backup_id"])
 
-	credentials, err := models.GetBackupDetails(id)
+	credentials, err := models.GetBackupDetails(buid)
 	utils.Check(err, "")
 	if err != nil {
 		response.Status = 403
@@ -30,31 +31,25 @@ func BackupHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.SetEnvVars(credentials)
-
-	opt := Opt{"path": credentials["source"]}
-	backup, err := NewBackup(opt)
-	response.Data = backup;
+	opt := Opt{"id": snid, "path": credentials["source"]}
+	files, err := GetFiles(opt)
+	utils.Check(err, "")
+	response.Data = files
 	json.NewEncoder(w).Encode(response)
-
 }
 
-func NewBackup(opt map[string]string) (bool, error) {
-	var ret = false
-	var l string
-	var cmd = "restic backup " + opt["path"]
+func GetFiles(opt map[string]string) (Files, error) {
+	var lines []string
+	var files = Files{}
+	var cmd = "restic -r " + os.Getenv("RESTIC_REPOSITORY") + " ls " + opt["id"]
 	out, err := exec.Command("bash", "-c", cmd).Output()
 	utils.Check(err, "")
+
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	for scanner.Scan() {
-		l = scanner.Text()
+		lines = append(lines, scanner.Text())
 	}
+	_, files = lines[0], lines[1:]
 
-	fields := strings.Fields(l)
-	if fields[2] == "saved" {
-		ret = true
-	}
-
-	fmt.Println(l)
-
-	return ret, err
+	return files, nil
 }

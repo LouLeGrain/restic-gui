@@ -19,14 +19,14 @@ func CompileCommand(data map[string]string) (string, error) {
 
 }
 
-func SetPassFile(path string, secret string) (string, error) {
+func SetFile(path string, content string) (string, error) {
 	f, err := os.Create(path)
 	Check(err, "")
 	defer f.Close()
-	_, err = f.Write([]byte(secret))
+	_, err = f.Write([]byte(content))
 	f.Sync()
-	passFilePath, _ := filepath.Abs(path)
-	return passFilePath, err
+	filePath, _ := filepath.Abs(path)
+	return filePath, err
 }
 
 func CheckProgExists(name string) (bool, error) {
@@ -80,4 +80,9 @@ func LcFirst(str string) string {
 		return string(unicode.ToLower(v)) + str[i+1:]
 	}
 	return ""
+}
+
+func SetEnvVars(c map[string]string) {
+	os.Setenv("RESTIC_PASSWORD", c["passwd"])
+	os.Setenv("RESTIC_REPOSITORY", c["destination"])
 }

@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"os"
 	"os/exec"
 	"simbookee/restic-gui/models"
 	"simbookee/restic-gui/utils"
@@ -13,16 +12,6 @@ import (
 
 	"net/http"
 )
-
-type Row struct {
-	Id       string `json:"id"`
-	DateTime string `json:"date"`
-	Host     string `json:"host"`
-	Path     string `json:"path"`
-}
-
-type Rows []Row
-type Opt map[string]string
 
 func SnapShotsHandler(w http.ResponseWriter, r *http.Request) {
 
@@ -41,14 +30,10 @@ func SnapShotsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fname := "./runtime/" + utils.GetMD5Hash(credentials["source"])
-	PassFile, err = utils.SetPassFile(fname, credentials["passwd"])
-	Destination = credentials["destination"]
-	utils.Check(err, "")
+	utils.SetEnvVars(credentials)
+
 	opt := Opt{"path": credentials["source"]}
 	snapshots, err := GetSnapshots(opt)
-	utils.Check(err, "")
-	err = os.Remove(PassFile)
 	utils.Check(err, "")
 	response.Data = snapshots
 	json.NewEncoder(w).Encode(response)
@@ -57,7 +42,7 @@ func SnapShotsHandler(w http.ResponseWriter, r *http.Request) {
 func GetSnapshots(opt map[string]string) (Rows, error) {
 	rows := Rows{}
 	var lines []string
-	var cmd = "restic -r " + Destination + " -p " + PassFile + " snapshots --path=" + opt["path"]
+	var cmd = "restic snapshots --path=" + opt["path"]
 
 	out, err := exec.Command("bash", "-c", cmd).Output()
 	utils.Check(err, "")

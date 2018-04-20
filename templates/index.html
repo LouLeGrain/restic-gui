@@ -1,7 +1,6 @@
 {{define "content"}}
 <div id="indexApp">
-    <h2>
-        <button id="new" type="button" class="btn btn-secondary">+</button>&nbsp;&nbsp;&nbsp;{{.Title}}</h2>
+    <h2>{{.Title}}</h2>
     <div id="indexApp"></div>
     <noscript><h2>Javascript needs to be enabled to send the payment!</h2></noscript>
     <div class="row">
@@ -9,14 +8,15 @@
             <div class="list-group">
             {{ range $_, $bu := .Backups }}
                 <a href="#" class="list-group-item backups" id="bu_{{$bu.Id}}" backup-id="{{$bu.Id}}">
-                    <h6>{{$bu.Name}}</h6>
+                    <h6 style="float:left;">{{$bu.Name}} </h6>
+                    <div style="float:right;" class="badge badge-secondary badge-pill"></div>
                 </a>
                 <div id="sn_{{$bu.Id}}" class="list-group snapshots"></div>
             {{end}}
             </div>
         </div>
-        <div class="col-md-9" class="details">
-            <div class="section" id="backup">
+        <div class="col-md-9">
+            <div class="main-view" id="backup">
                 <div class="row">
                     <h5 class="col-md-9" id="bu-name"></h5>
                     <h5 class="col-md-2"><a href="#" class="badge badge-secondary new-bu" id="bu-button"> New
@@ -29,21 +29,26 @@
                 <div class="row">
                     <div class="col-md-3">Location:</div>
                     <div class="col-md-6" id="bu-loc"></div>
-                    <div class="col-md-2"><a href="#" class="badge badge-secondary"> Change </a></div>
                 </div>
                 <div class="row">
                     <div class="col-md-3">Destination:</div>
                     <div class="col-md-6" id="repo-path"></div>
-                    <div class="col-md-2"><a href="#" class="badge badge-secondary"> Delete </a></div>
                 </div>
                 <div class="row">
                     <div class="col-md-3">Storage type:</div>
                     <div class="col-md-6" id="repo-type"></div>
+                    <div class="col-md-3"><a href="#" class="badge badge-light"> Change </a>&nbsp;&nbsp;&nbsp;<a
+                            href="#" class="badge badge-light"> Delete </a></div>
                 </div>
             </div>
-            <div class="section" id="files">
-                <h6>Files</h6>
-
+            <div class="main-view" id="files">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h5 class="alert alert-success" role="alert">Files for snapshot <span id="sn-id"></span> on
+                            <span id="sn-date"></span></h5>
+                        <div id="file-list"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -52,8 +57,7 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-        $('.section').hide();
-        $('#backup').show();
+        $('#files').hide();
         var data = JSON.parse('{{.Data}}');
         var prop = '';
 
@@ -68,29 +72,53 @@
         })
 
         $('.backups').click(function (e) {
+            e.preventDefault()
+            $('#files').hide()
+            prop = $(this).attr('backup-id')
+            if ($(this).hasClass('active')) {
+                $('#sn_' + prop).toggle()
+                return
+            }
             $('.section').hide();
             $('#backup').show();
-            e.preventDefault()
-            prop = $(this).attr('backup-id')
             $(this).tab('show')
             showDeatils()
-
         })
 
-        $(".snapshots").on('click', (function (e) {
-
+        $(".snapshots").on('click', '.snapshot', (function (e) {
                     e.preventDefault()
-                    console.log(e)
-
-                    //alert($(this).attr('id'))
-                    //$(this).addClass(" alert alert-secondary alert-link");
+            var snid = $(this).attr('id')
+            $(this).addClass('alert alert-success')
+            var date = $('#' + snid).html()
+            $.ajax({
+                type: "GET",
+                url: "/api/files/" + prop + "/" + snid,
+                // The key needs to match your method's input parameter (case-sensitive).
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    if (data.status == 200) {
+                        $('#sn-id').html(snid)
+                        $('#sn-date').html(date)
+                        $('#file-list').html('');
+                        $.each(data.data, function (idx, val) {
+                            str = "<div>" + val + "</div>"
+                            $('#file-list').append(str);
+                        });
+                        $('#files').show()
+                    }
+                },
+                failure: function (errMsg) {
+                    alert(errMsg)
+                }
+            });
                 })
         )
 
         function createBackup(buid) {
             $.ajax({
                 type: "GET",
-                url: "/api/newsnapshot/" + buid,
+                url: "/api/snapshots/new/" + buid,
                 // The key needs to match your method's input parameter (case-sensitive).
                 contentType: "application/json; charset=utf-8",
                 dataType: "json",
@@ -120,16 +148,16 @@
         function getSnapshots(bu) {
             var request = $.ajax({
                 dataType: "json",
-                url: "/api/backup/" + bu.id + "/snapshots"
+                url: "/api/snapshots/" + bu.id
             });
 
             request.done(function (data) {
                 $('#sn_' + prop).html('')
                 if (data.status == 200) {
-                    console.log(data.data)
+                    $("#bu_" + prop + " .badge").html(data.data.length)
                     var str = ''
                     $.each(data.data, function (idx, val) {
-                        str = '<a href="#" id="' + val.id + '" class="list-group-item sn small">' + val.date + '</a>'
+                        str = '<a href="#" id="' + val.id + '" class="list-group-item snapshot small d-flex justify-content-between align-items-center" role="alert">' + val.date + '</a>'
                         $('#sn_' + prop).append(str);
                     });
                 }

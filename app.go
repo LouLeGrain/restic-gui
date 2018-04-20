@@ -12,40 +12,31 @@ import (
 )
 
 const PORT = "8000"
+
 const DB_TYPE = "sqlite"
 
-type PageData struct {
-	Title   string
-	Err     string
-	Message string
-	Repos   models.Repos
-	Backups models.Backups
-	Data    string
-}
-
-type JsonResponse struct {
-	Status int         `json:"status"`
-	Data   interface{} `json:"data"`
-}
-
-var PassFile string
-var Destination string
-
 func main() {
+	//init bd
 	_, err := models.GetDb(DB_TYPE)
 	utils.Check(err, "fatal")
 
+	//setup router
 	r := mux.NewRouter()
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	r.PathPrefix("/runtime/").Handler(http.StripPrefix("/runtime/", http.FileServer(http.Dir("./runtime/"))))
+
+	//routes
+	r.HandleFunc("/", IndexHandler).Methods("GET")
+	r.HandleFunc("/api/snapshots/{backup_id}", SnapShotsHandler).Methods("GET")
+	r.HandleFunc("/api/snapshots/new/{backup_id}", BackupHandler).Methods("GET")
+	r.HandleFunc("/api/files/{backup_id}/{snapshot_id}", FilesHandler).Methods("GET")
+
+	//test route
 	r.HandleFunc("/test", TestHandler).Methods("GET")
 
-	r.HandleFunc("/", IndexHandler).Methods("GET")
-	r.HandleFunc("/api/backup/{backup_id}/snapshots", SnapShotsHandler).Methods("GET")
-	r.HandleFunc("/api/snapshot/{snapshot_id}/files/", SnapShotHandler).Methods("GET")
-	r.HandleFunc("/api/newsnapshot/{backup_id}", BackupHandler).Methods("GET")
-
 	http.Handle("/", r)
+
+	//run app
 	log.Fatal(http.ListenAndServe(getPort(), r))
 }
 
@@ -76,7 +67,7 @@ func render(w http.ResponseWriter, tmpl string, p PageData, l string) {
 }
 
 func getPort() string {
-	p := os.Getenv("PORT")
+	p := os.Getenv("RESTIC_PORT")
 	if p != "" {
 		return ":" + p
 	}
@@ -84,25 +75,31 @@ func getPort() string {
 }
 
 /*todo
-restic -r /Users/andi/backup/test init
-restic -r /tmp/backup backup ~/work
-restic -r /Users/andi/backup/test snapshots
-restic -r /tmp/backup snapshots --path="/srv" (--host luigi , )
-restic -r /tmp/backup diff 5845b002 2ab627a6
-restic -r /tmp/backup restore 79766175 --target /tmp/restore-work
-cat mypassword > repo_pwd.txt
-restic -r /Volumes/restic/jussi -p repo_pwd.txt backup --exclude-file exclude.txt ~/Music/GarageBand
-restic -r /tmp/backup backup --tag projectX --tag foo --tag bar ~/work
-restic -r /tmp/backup restore latest --target /tmp/restore-art --path "/home/art" --host luigi
-restic -r /tmp/backup restore 79766175 --target /tmp/restore-work --include /work/foo
-restic -r /tmp/backup mount /mnt/restic
-restic -r /tmp/backup dump latest production.sql | mysql
-restic -r /tmp/backup forget bdbd3439
-restic -r /tmp/backup prune
+restic init
+
+restic backup ~/work
+restic backup --exclude-file exclude.txt ~/Music/GarageBand
+restic backup --tag projectX --tag foo --tag bar ~/work
+
+restic snapshots
+restic snapshots --path --host --tag )
+
+restic diff 5845b002 2ab627a6
+
+restic restore 79766175 --target /tmp/restore-work
+restic restore latest --target /tmp/restore-art --path "/home/art" --host luigi
+restic restore 79766175 --target /tmp/restore-work --include /work/foo
+
+restic mount /mnt/restic
+restic dump latest production.sql | mysql
+
+restic forget bdbd3439
 restic forget --keep-last 1 --prune
 restic forget --tag foo --keep-last 1
 restic forget --tag foo --tag bar --keep-last 1
 restic forget --tag foo,tag bar --keep-last 1
-forget --keep-daily 7 --keep-weekly 5 --keep-monthly 12 --keep-yearly 75
-restic -r /tmp/backup key list
+restic rorget --keep-daily 7 --keep-weekly 5 --keep-monthly 12 --keep-yearly 75
+restic prune
+
+restic key list
 */

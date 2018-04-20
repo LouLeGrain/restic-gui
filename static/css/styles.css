@@ -6,6 +6,18 @@
     margin-bottom: 1em;
 }
 
-.list-group-item {
-    padding: 3px 10px
+#file-list div {
+    font-size: 0.8rem;
+    line-height: 1.4em;
+}
+
+.main-view {
+    border: 1px solid lightgrey;
+    border-radius: 0.4em;
+    padding: 1em;
+    margin-bottom: 1em;
+}
+
+.snapshots .list-group-item {
+    padding: 0.4rem 0.6rem;
 }
