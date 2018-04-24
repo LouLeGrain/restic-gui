@@ -86,3 +86,12 @@ func SetEnvVars(c map[string]string) {
 	os.Setenv("RESTIC_PASSWORD", c["passwd"])
 	os.Setenv("RESTIC_REPOSITORY", c["destination"])
 }
+
+func SliceIndex(f []string, t string) int {
+	for i, val := range f {
+		if val == t {
+			return i
+		}
+	}
+	return -1
+}

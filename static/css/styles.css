@@ -21,3 +21,7 @@
 .snapshots .list-group-item {
     padding: 0.4rem 0.6rem;
 }
+
+.left-list {
+    margin-bottom: 1em;
+}

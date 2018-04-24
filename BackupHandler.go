@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
 	"os/exec"
@@ -53,8 +52,6 @@ func NewBackup(opt map[string]string) (bool, error) {
 	if fields[2] == "saved" {
 		ret = true
 	}
-
-	fmt.Println(l)
 
 	return ret, err
 }

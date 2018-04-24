@@ -4,8 +4,8 @@
     <div id="indexApp"></div>
     <noscript><h2>Javascript needs to be enabled to send the payment!</h2></noscript>
     <div class="row">
-        <div class="col-md-3">
-            <div class="list-group">
+        <div class="col-md-3 left-list">
+            <div class="list-group" role="alert">
             {{ range $_, $bu := .Backups }}
                 <a href="#" class="list-group-item backups" id="bu_{{$bu.Id}}" backup-id="{{$bu.Id}}">
                     <h6 style="float:left;">{{$bu.Name}} </h6>
@@ -67,6 +67,36 @@
 
         showDeatils()
 
+        $(".snapshots").on('click', '.snapshot', (function (e) {
+            e.preventDefault()
+            var snid = $(this).attr('id')
+            $('.snapshot').removeClass('list-group-item-primary')
+            $(this).addClass('list-group-item-primary')
+            var date = $('#' + snid).html()
+            $.ajax({
+                type: "GET",
+                url: "/api/files/" + prop + "/" + snid,
+                // The key needs to match your method's input parameter (case-sensitive).
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    if (data.status == 200) {
+                        $('#sn-id').html(snid)
+                        $('#sn-date').html(date)
+                        $('#file-list').html('');
+                        $.each(data.data, function (idx, val) {
+                            str = "<div>" + val.Name + "</div>"
+                            $('#file-list').append(str);
+                        });
+                        $('#files').show()
+                    }
+                },
+                failure: function (errMsg) {
+                    alert(errMsg)
+                }
+            });
+        }))
+
         $('.new-bu').click(function (e) {
             createBackup($(this).attr('backup-id'))
         })
@@ -84,36 +114,6 @@
             $(this).tab('show')
             showDeatils()
         })
-
-        $(".snapshots").on('click', '.snapshot', (function (e) {
-                    e.preventDefault()
-            var snid = $(this).attr('id')
-            $(this).addClass('alert alert-success')
-            var date = $('#' + snid).html()
-            $.ajax({
-                type: "GET",
-                url: "/api/files/" + prop + "/" + snid,
-                // The key needs to match your method's input parameter (case-sensitive).
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function (data) {
-                    if (data.status == 200) {
-                        $('#sn-id').html(snid)
-                        $('#sn-date').html(date)
-                        $('#file-list').html('');
-                        $.each(data.data, function (idx, val) {
-                            str = "<div>" + val + "</div>"
-                            $('#file-list').append(str);
-                        });
-                        $('#files').show()
-                    }
-                },
-                failure: function (errMsg) {
-                    alert(errMsg)
-                }
-            });
-                })
-        )
 
         function createBackup(buid) {
             $.ajax({

@@ -13,16 +13,30 @@ import (
 	"strings"
 )
 
+type File struct {
+	Id       string `json:Id`
+	ParentId string `json:ParentId`
+	Name     string `json:Name`
+}
+
+type SnFiles []File
+
 func FilesHandler(w http.ResponseWriter, r *http.Request) {
+
 	w.Header().Set("Content-Type", "application/json")
+
 	response := JsonResponse{200, nil}
 
 	v := mux.Vars(r)
+
 	snid := v["snapshot_id"]
+
 	buid, _ := strconv.Atoi(v["backup_id"])
 
 	credentials, err := models.GetBackupDetails(buid)
+
 	utils.Check(err, "")
+
 	if err != nil {
 		response.Status = 403
 		response.Data = "Bad request"
@@ -31,25 +45,53 @@ func FilesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.SetEnvVars(credentials)
+
 	opt := Opt{"id": snid, "path": credentials["source"]}
-	files, err := GetFiles(opt)
+
+	files, err := GetRestoreFiles(opt)
+
 	utils.Check(err, "")
-	response.Data = files
+
+	snfiles, err := BuildFiles(files)
+
+	utils.Check(err, "")
+
+	response.Data = snfiles
+
 	json.NewEncoder(w).Encode(response)
 }
 
-func GetFiles(opt map[string]string) (Files, error) {
-	var lines []string
-	var files = Files{}
+func GetRestoreFiles(opt map[string]string) (Files, error) {
+	filerows := []string{}
 	var cmd = "restic -r " + os.Getenv("RESTIC_REPOSITORY") + " ls " + opt["id"]
 	out, err := exec.Command("bash", "-c", cmd).Output()
 	utils.Check(err, "")
-
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
+		filerows = append(filerows, scanner.Text())
 	}
-	_, files = lines[0], lines[1:]
 
-	return files, nil
+	return filerows[1:], nil
+}
+
+func BuildFiles(f []string) (SnFiles, error) {
+
+	snfiles := SnFiles{}
+	for i, v := range f {
+		var fobj = File{}
+
+		fileSlice := strings.SplitAfter(v, "/")
+
+		if len(fileSlice) <= 2 {
+			fobj = File{strconv.Itoa(i), "#", fileSlice[0]}
+		} else {
+			path := strings.Replace(strings.Join(fileSlice[:len(fileSlice)-1], "/"), "//", "/", len(fileSlice)-1)
+			idx := utils.SliceIndex(f, path[:len(path)-1])
+			fobj = File{strconv.Itoa(i), strconv.Itoa(idx), fileSlice[len(fileSlice)-1]}
+		}
+
+		snfiles = append(snfiles, fobj)
+	}
+
+	return snfiles, nil
 }
