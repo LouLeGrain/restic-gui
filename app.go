@@ -29,6 +29,8 @@ func main() {
 	r.HandleFunc("/", IndexHandler).Methods("GET")
 	r.HandleFunc("/api/snapshots/{backup_id}", SnapShotsHandler).Methods("GET")
 	r.HandleFunc("/api/snapshots/new/{backup_id}", BackupHandler).Methods("GET")
+	r.HandleFunc("/api/snapshots/forget/{backup_id}/{snapshot_id}", ForgetHandler).Methods("GET")
+	r.HandleFunc("/api/snapshots/prune/{backup_id}", PruneHandler).Methods("GET")
 	r.HandleFunc("/api/files/{backup_id}/{snapshot_id}", FilesHandler).Methods("GET")
 
 	//test route
@@ -76,10 +78,7 @@ func getPort() string {
 
 /*todo
 restic init
-
-restic backup ~/work
 restic backup --exclude-file exclude.txt ~/Music/GarageBand
-restic backup --tag projectX --tag foo --tag bar ~/work
 
 restic snapshots
 restic snapshots --path --host --tag )

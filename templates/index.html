@@ -29,30 +29,45 @@
                 <div class="row">
                     <div class="col-md-3">Location:</div>
                     <div class="col-md-6" id="bu-loc"></div>
+                    <div class="col-md-3">
+                        <a href="#" class="badge badge-light" id="bu-prune"> Refresh </a>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-md-3">Destination:</div>
                     <div class="col-md-6" id="repo-path"></div>
+                    <div class="col-md-3">
+                        <a href="#" class="badge badge-light" id="bu-change"> Change </a>
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-md-3">Storage type:</div>
                     <div class="col-md-6" id="repo-type"></div>
-                    <div class="col-md-3"><a href="#" class="badge badge-light"> Change </a>&nbsp;&nbsp;&nbsp;<a
-                            href="#" class="badge badge-light"> Delete </a></div>
-                </div>
-            </div>
-            <div class="main-view" id="files">
-                <div class="row">
-                    <div class="col-md-12">
-                        <h5 class="alert alert-success" role="alert">Files for snapshot <span id="sn-id"></span> on
-                            <span id="sn-date"></span></h5>
-                        <div id="file-list"></div>
+                    <div class="col-md-3">
+                        <a href="#" class="badge badge-light" id="bu-delete"> Delete </a>
                     </div>
                 </div>
             </div>
+            <div class="main-view" id="files" style="display:none;">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h5 class="alert alert-success" role="alert"><span id="file-count"></span>
+                            files
+                            for snapshot <span id="sn-id"></span> on
+                            <span id="sn-date"></span>
+                            <button id="delete" delete-id=""> Delete</button>
+                        </h5>
+                        <h5 class="alert alert-danger" role="alert" style="display:none;">Could not find files in
+                            snapshot!</h5>
+                        <div id="tree"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="main-view" id="message" style="display:none;">
+                <h5 class="alert alert-success" role="alert"></h5>
+            </div>
         </div>
     </div>
-</div>
 </div>
 
 <script type="text/javascript">
@@ -60,15 +75,58 @@
         $('#files').hide();
         var data = JSON.parse('{{.Data}}');
         var prop = '';
-
         for (prop in data.backups) {
             break
         }
 
         showDeatils()
 
+        $('#bu-prune').on('click', function (e) {
+            e.preventDefault()
+            $.ajax({
+                type: "GET",
+                url: "/api/snapshots/prune/" + prop,
+                // The key needs to match your method's input parameter (case-sensitive).
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    if (data.status == 200) {
+                        if (data.status == 200) {
+                            $('#message h5').html('Repository refreshed')
+                            $('#message h5').addClass('alert-success')
+                            $('#message').show()
+                            $('#message').delay(2000).fadeOut("slow");
+                        }
+                    }
+                }
+            })
+        })
+
+        $('#delete').on('click', function (e) {
+            e.preventDefault()
+            $('#files').hide()
+            var id = $(this).attr('delete-id')
+            $.ajax({
+                type: "GET",
+                url: "/api/snapshots/forget/" + prop + "/" + id,
+                // The key needs to match your method's input parameter (case-sensitive).
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    if (data.status == 200) {
+                        $('#message h5').html('Snapshot ' + id + ' successfully deleted')
+                        $('#message h5').addClass('alert-success')
+                        $('#message').show()
+                        showDeatils()
+                        $('#message').delay(2000).fadeOut("slow");
+                    }
+                }
+            })
+        })
+
         $(".snapshots").on('click', '.snapshot', (function (e) {
             e.preventDefault()
+            $('.alert-danger').hide()
             var snid = $(this).attr('id')
             $('.snapshot').removeClass('list-group-item-primary')
             $(this).addClass('list-group-item-primary')
@@ -82,14 +140,35 @@
                 success: function (data) {
                     if (data.status == 200) {
                         $('#sn-id').html(snid)
+                        $('#delete').attr('delete-id', snid)
                         $('#sn-date').html(date)
-                        $('#file-list').html('');
-                        $.each(data.data, function (idx, val) {
-                            str = "<div>" + val.Name + "</div>"
-                            $('#file-list').append(str);
-                        });
-                        $('#files').show()
+                        $('#file-count').html(data.data.length);
+
+                        $('#tree').jstree({
+                            "types": {
+                                "root": {
+                                    "valid_children": ["default"]
+                                },
+                                "default": {
+                                    "valid_children": ["default", "file"]
+                                },
+                                "file": {
+                                    "icon": "glyphicon glyphicon-file",
+                                    "valid_children": []
+                                }
+                            },
+                            "plugins": [
+                                "types", "wholerow"
+                            ]
+                        })
+                        $('#tree').jstree(true).settings.core.data = data.data;
+                        $('#tree').jstree(true).refresh();
+
+                    } else {
+                        $('.alert-danger').show()
+                        $('.alert-success').hide()
                     }
+                    $('#files').show()
                 },
                 failure: function (errMsg) {
                     alert(errMsg)
@@ -124,7 +203,12 @@
                 dataType: "json",
                 success: function (data) {
                     if (data.data == true) {
+                        $('#files').hide()
+                        $('#message h5').html('New snapshot created')
+                        $('#message h5').addClass('alert-success')
+                        $('#message').show()
                         showDeatils()
+                        $('#message').delay(2000).fadeOut("slow");
                     }
                 },
                 failure: function (errMsg) {

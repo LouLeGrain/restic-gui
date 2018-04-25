@@ -14,27 +14,22 @@ import (
 )
 
 type File struct {
-	Id       string `json:Id`
-	ParentId string `json:ParentId`
-	Name     string `json:Name`
+	Id     string `json:"id"`
+	Parent string `json:"parent"`
+	Text   string `json:"text"`
+	Link   string `json:"li_attr"`
 }
 
 type SnFiles []File
 
 func FilesHandler(w http.ResponseWriter, r *http.Request) {
-
 	w.Header().Set("Content-Type", "application/json")
-
 	response := JsonResponse{200, nil}
-
 	v := mux.Vars(r)
-
 	snid := v["snapshot_id"]
-
 	buid, _ := strconv.Atoi(v["backup_id"])
 
 	credentials, err := models.GetBackupDetails(buid)
-
 	utils.Check(err, "")
 
 	if err != nil {
@@ -45,19 +40,14 @@ func FilesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.SetEnvVars(credentials)
-
 	opt := Opt{"id": snid, "path": credentials["source"]}
-
 	files, err := GetRestoreFiles(opt)
-
 	utils.Check(err, "")
 
-	snfiles, err := BuildFiles(files)
-
+	snfiles, err := BuildFilesData(files)
 	utils.Check(err, "")
 
 	response.Data = snfiles
-
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -74,22 +64,19 @@ func GetRestoreFiles(opt map[string]string) (Files, error) {
 	return filerows[1:], nil
 }
 
-func BuildFiles(f []string) (SnFiles, error) {
-
+func BuildFilesData(f []string) (SnFiles, error) {
 	snfiles := SnFiles{}
 	for i, v := range f {
 		var fobj = File{}
-
 		fileSlice := strings.SplitAfter(v, "/")
 
 		if len(fileSlice) <= 2 {
-			fobj = File{strconv.Itoa(i), "#", fileSlice[0]}
+			fobj = File{"key_" + strconv.Itoa(i), "#", fileSlice[1], "{\"path\":\"" + v + "\"}"}
 		} else {
 			path := strings.Replace(strings.Join(fileSlice[:len(fileSlice)-1], "/"), "//", "/", len(fileSlice)-1)
 			idx := utils.SliceIndex(f, path[:len(path)-1])
-			fobj = File{strconv.Itoa(i), strconv.Itoa(idx), fileSlice[len(fileSlice)-1]}
+			fobj = File{"key_" + strconv.Itoa(i), "key_" + strconv.Itoa(idx), fileSlice[len(fileSlice)-1], "{\"path\":\"" + v + "\"}"}
 		}
-
 		snfiles = append(snfiles, fobj)
 	}
 

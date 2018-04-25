@@ -32,7 +32,7 @@ func BackupHandler(w http.ResponseWriter, r *http.Request) {
 
 	opt := Opt{"path": credentials["source"]}
 	backup, err := NewBackup(opt)
-	response.Data = backup;
+	response.Data = backup
 	json.NewEncoder(w).Encode(response)
 
 }
