@@ -2,7 +2,7 @@
 <div id="indexApp">
     <h2>{{.Title}}</h2>
     <div id="indexApp"></div>
-    <noscript><h2>Javascript needs to be enabled to send the payment!</h2></noscript>
+    <noscript><h2>Javascript needs to be enabled to use this program!</h2></noscript>
     <div class="row">
         <div class="col-md-3 left-list">
             <div class="list-group" role="alert">
@@ -16,7 +16,7 @@
             </div>
         </div>
         <div class="col-md-9">
-            <div class="main-view" id="backup">
+            <div class="main-view" id="backup" style="display:none;">
                 <div class="row">
                     <h5 class="col-md-9" id="bu-name"></h5>
                     <h5 class="col-md-2"><a href="#" class="badge badge-secondary new-bu" id="bu-button"> New
@@ -50,17 +50,20 @@
             </div>
             <div class="main-view" id="files" style="display:none;">
                 <div class="row">
-                    <div class="col-md-12">
-                        <h5 class="alert alert-success" role="alert"><span id="file-count"></span>
+                    <div class="col-md-10">
+                        <h6 class="alert alert-success" role="alert"><span id="file-count"></span>
                             files
                             for snapshot <span id="sn-id"></span> on
                             <span id="sn-date"></span>
-                            <button id="delete" delete-id=""> Delete</button>
-                        </h5>
-                        <h5 class="alert alert-danger" role="alert" style="display:none;">Could not find files in
-                            snapshot!</h5>
-                        <div id="tree"></div>
+                        </h6>
                     </div>
+                    <div class="col-md-2">
+                        <h6 class="alert alert-success" role="alert"><a href="#" id="delete" delete-id="">Delete</a>
+                        </h6>
+                    </div>
+                    <h6 class="alert alert-danger" role="alert" style="display:none;">Could not find files in
+                        snapshot!</h6>
+                    <div id="tree"></div>
                 </div>
             </div>
             <div class="main-view" id="message" style="display:none;">
@@ -72,14 +75,10 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
-        $('#files').hide();
-        var data = JSON.parse('{{.Data}}');
-        var prop = '';
-        for (prop in data.backups) {
-            break
-        }
 
-        showDeatils()
+        var data = JSON.parse('{{.Data}}');
+
+        var prop = '';
 
         $('#bu-prune').on('click', function (e) {
             e.preventDefault()

@@ -45,7 +45,7 @@ func sqliteConnect() (bool, error) {
 func sqliteMigrate() {
 	sql := `PRAGMA foreign_keys = false;
 		
-		CREATE TABLE  IF NOT EXISTS repositories (
+		CREATE TABLE IF NOT EXISTS repositories (
 			 repository_id integer,
 			 created integer NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			 path text,
@@ -55,7 +55,7 @@ func sqliteMigrate() {
 			PRIMARY KEY("repository_id")
 		);
 		
-		CREATE TABLE  IF NOT EXISTS backups (
+		CREATE TABLE IF NOT EXISTS backups (
 			 backup_id integer,
 			 created integer NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			 repository_id integer NOT NULL , 
@@ -64,7 +64,15 @@ func sqliteMigrate() {
 			 status integer,
 			PRIMARY KEY("backup_id")
 		);
-		
+
+		CREATE TABLE IF NOT EXISTS data (
+   			id integer PRIMARY KEY AUTOINCREMENT,
+			source text NOT NULL,
+    		source_id int NOT NULL,
+    		key text,
+    		value text
+		);
+		CREATE UNIQUE INDEX data_source_source_id_key_uindex ON data (source, source_id, key);
 		PRAGMA foreign_keys = true;
 		
 		INSERT INTO repositories (path, password) VALUES ('/backups','secretpasswd');
