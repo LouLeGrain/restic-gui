@@ -20,7 +20,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	utils.Check(err, "")
 	_, err = utils.CheckProgExists("restic")
 	if err != nil {
-		pageData.Err = "System Error. Please contact support at support@simbookee.com"
+		pageData.Err = "System Error."
 	}
 
 	pageData.Repos = repositories
