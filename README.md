@@ -1,7 +1,7 @@
 # Restic GUI
 
 Restic GUI is a web app written in Go that helps with backing up with restic cli program written in go. 
-The interface design is somewhat borrowed fro ARQ Backup which uses the same methodology for backing up. 
+The interface design is somewhat borrowed from ARQ Backup which uses the same methodology for backing up. 
 A simple go server with bootstrap and jquery is used to build the frontend interface. 
 Later I like to replace that will a Vue SAP. 
 
