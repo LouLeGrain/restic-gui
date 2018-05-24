@@ -12,6 +12,14 @@ import (
 	"strings"
 )
 
+func CreateBackupHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	response := JsonResponse{200, nil}
+
+	json.NewEncoder(w).Encode(response)
+}
+
+
 func BackupHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	response := JsonResponse{200, nil}

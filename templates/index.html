@@ -1,8 +1,24 @@
 {{define "content"}}
+<noscript><h2>Javascript needs to be enabled to use this program!</h2></noscript>
 <div id="indexApp">
-    <h2>{{.Title}}</h2>
+    <div class="row header">
+        <div class="col-md-8">
+            <h2>{{.Title}}</h2>
+        </div>
+        <div class="col-md-2">
+            <h3>
+                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#destModal">Add Destination
+                </button>
+            </h3>
+        </div>
+        <div class="col-md-2">
+            <h3>
+                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#srcModal">Add Backup
+                </button>
+            </h3>
+        </div>
+    </div>
     <div id="indexApp"></div>
-    <noscript><h2>Javascript needs to be enabled to use this program!</h2></noscript>
     <div class="row">
         <div class="col-md-3 left-list">
             <div class="list-group" role="alert">
@@ -73,12 +89,167 @@
     </div>
 </div>
 
+<div class="modal fade" id="destModal" tabindex="-1" role="dialog" aria-labelledby="destModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Create new backup</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form class="modal-body" id="destForm">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="destName">Destation Name</label>
+                            <input type="text" class="form-control" id="destPasswd" aria-describedby="destNameHelp"
+                                   placeholder="Name">
+                            <small id="destNameHelp" class="form-text text-muted">Please choose a for easy
+                                identifiction.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="dest">Pick a destination type</label>
+                            <select class="form-control" id="dest" aria-describedby="destHelp">
+                                <option value="local">Local Folder</option>
+                                <option value="sftp">SFTP Server</option>
+                                <option value="bb">BackBlaze</option>
+                                <option value="s3">AWS S3</option>
+                            </select>
+                            <small id="destHelp" class="form-text text-muted">Certain destinations types require
+                                additional options.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="destPasswd">Destination Password</label>
+                            <input type="text" class="form-control" id="destPasswd" aria-describedby="destPasswdHelp"
+                                   placeholder="Password">
+                            <small id="destPasswdHelp" class="form-text text-muted">Please choose a password to encrypt
+                                your backup.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="srcModal" tabindex="-1" role="dialog" aria-labelledby="srcModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Create new backup</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form class="modal-body" id="srcForm">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="srcName">Name</label>
+                            <input type="text" class="form-control" id="srcName" aria-describedby="srcNameHelp"
+                                   placeholder="Name">
+                            <small id="srcNameHelp" class="form-text text-muted">Please give your backup a name.</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="src">Location</label>
+                            <input type="text" class="form-control" id="src" aria-describedby="srcHelp"
+                                   placeholder="Source Path">
+                            <small id="srcHelp" class="form-text text-muted">Please enter the source path!</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="dest">Select the backup destination</label>
+                            <select class="form-control" id="dest" aria-describedby="destHelp"></select>
+                            <small id="destHelp" class="form-text text-muted">Please pick a backup destation.</small>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" id="saveNewBackup" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
 <script type="text/javascript">
     $(document).ready(function () {
+
+        $('#destModal').modal('handleUpdate')
+
+        $('#srcModal').modal('handleUpdate')
+
+        $('#srcModal').on('show.bs.modal', function (e) {
+            var modal = $(this)
+            var select = modal.find('.modal-body #dest')
+            select.find('option').remove()
+            $.ajax({
+                type: "GET",
+                url: "/api/repositories",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    if (response.status == 200) {
+                        $.each(response.data, function (key, item) {
+                            select.append($("<option/>", {
+                                value: item.id,
+                                text: item.path
+                            }));
+                        });
+                    }
+                },
+                failure: function (errMsg) {
+                    console.log(errMsg)
+                }
+            });
+
+        })
 
         var data = JSON.parse('{{.Data}}');
 
         var prop = '';
+
+        $('#saveNewBackup').on('click', function (e) {
+
+            $.ajax({
+                type: "POST",
+                url: "/api/newbackup",
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    if (response.status == 200) {
+                        $('#srcModal').modal('hide')
+                        console.log(response)
+                    }
+                },
+                failure: function (errMsg) {
+                    console.log(errMsg)
+                }
+            });
+        });
 
         $('#bu-prune').on('click', function (e) {
             e.preventDefault()
@@ -90,12 +261,10 @@
                 dataType: "json",
                 success: function (data) {
                     if (data.status == 200) {
-                        if (data.status == 200) {
-                            $('#message h5').html('Repository refreshed')
-                            $('#message h5').addClass('alert-success')
-                            $('#message').show()
-                            $('#message').delay(2000).fadeOut("slow");
-                        }
+                        $('#message h5').html('Repository refreshed')
+                        $('#message h5').addClass('alert-success')
+                        $('#message').show()
+                        $('#message').delay(2000).fadeOut("slow");
                     }
                 }
             })
@@ -271,39 +440,6 @@
         $("#formBuPath").blur(function (e) {
             checkValidPath($(this).val());
         });
-
-        /*
-             function showDetail(idx) {
-                 var type = backups[idx].repoType;
-                 //console.log(backups[idx])
-                 $('#formBuName').val(backups[idx].backupName);
-                 $('#formBuPath').val(backups[idx].backupPath);
-                 $('#formRepoPath').val(backups[idx].repoPath);
-                 $('#formRepoPasswd').val(backups[idx].repoPasswd);
-                 $("input[name=type][value=" + type + "]").prop("checked", true);
-                 checkValidPath(backups[idx].backupPath);
-             }
-
-
-             $('.list-group-item').on('click', function () {
-                 $('.list-group-item').removeClass('active');
-                 $(this).addClass('active');
-                 var idxStr = $(this).attr('id');
-                 idx = idxStr.substring(4, idxStr.length);
-                 showDetail(idx)
-             })
-
-
-             $("#details-form").submit(function (e) {
-                 e.preventDefault();
-                 console.log(error);
-                 saveBuDetails()
-             });
-
-             function saveBuDetails() {
-                 alert('save')
-             }
-     */
     })
 
 </script>
