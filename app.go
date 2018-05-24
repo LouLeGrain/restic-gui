@@ -11,7 +11,7 @@ import (
 	"simbookee/restic-gui/utils"
 )
 
-const PORT = "8000"
+const PORT = "8008"
 
 const DB_TYPE = "sqlite"
 
@@ -37,9 +37,9 @@ func main() {
 
 	//test route
 	r.HandleFunc("/test", TestHandler).Methods("GET")
-
 	http.Handle("/", r)
 
+	utils.OpenBrowser("http://localhost" + getPort() + "/")
 	//run app
 	log.Fatal(http.ListenAndServe(getPort(), r))
 }

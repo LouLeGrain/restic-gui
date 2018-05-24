@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"unicode"
+	"runtime"
 )
 
 func CompileCommand(data map[string]string) (string, error) {
@@ -94,4 +95,23 @@ func SliceIndex(f []string, t string) int {
 		}
 	}
 	return -1
+}
+
+func OpenBrowser(url string) {
+	var err error
+
+	switch runtime.GOOS {
+	case "linux":
+		err = exec.Command("xdg-open", url).Run()
+	case "windows":
+		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Run()
+	case "darwin":
+		err = exec.Command("open", url).Run()
+	default:
+		err = fmt.Errorf("unsupported platform")
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }

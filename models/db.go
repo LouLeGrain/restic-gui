@@ -76,10 +76,7 @@ func sqliteMigrate() {
 		PRAGMA foreign_keys = true;
 		
 		INSERT INTO repositories (path, password) VALUES ('/backups','secretpasswd');
-		INSERT INTO repositories (path, password) VALUES ('/backups/new','secretpasswd');
-		INSERT INTO backups (repository_id, name, source, status) VALUES (1, 'Desktop', '~/Desktop', 1);
-		INSERT INTO backups (repository_id, name, source, status) VALUES (2, 'Movies', '~/Movies', 1);
-		INSERT INTO backups (repository_id, name, source, status) VALUES (1, 'Users', '/Users', 0);
+		INSERT INTO backups (repository_id, name, source, status) VALUES (1, 'My Home Dir', '~/', 1);
 		`
 
 	_, err := Db.Exec(sql)
