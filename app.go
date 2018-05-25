@@ -27,7 +27,7 @@ func main() {
 
 	//routes
 	r.HandleFunc("/", IndexHandler).Methods("GET")
-	r.HandleFunc("/api/repositories", RepositoryHandler).Methods("GET", "POST")
+	r.HandleFunc("/api/repositories", CreateRepositoryHandler).Methods("GET", "POST")
 	r.HandleFunc("/api/newbackup", CreateBackupHandler).Methods("POST")
 	r.HandleFunc("/api/snapshots/{backup_id}", SnapShotsHandler).Methods("GET")
 	r.HandleFunc("/api/snapshots/new/{backup_id}", BackupHandler).Methods("GET")

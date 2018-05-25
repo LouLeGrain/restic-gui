@@ -28,7 +28,7 @@ func BackupHandler(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(v["backup_id"])
 
 	credentials, err := models.GetBackupDetails(id)
-	utils.Check(err, "")
+	utils.Check(err, "fatal")
 	if err != nil {
 		response.Status = 403
 		response.Data = "Bad request"
@@ -50,7 +50,7 @@ func NewBackup(opt map[string]string) (bool, error) {
 	var l string
 	var cmd = "restic backup " + opt["path"]
 	out, err := exec.Command("bash", "-c", cmd).Output()
-	utils.Check(err, "")
+	utils.Check(err, "fatal")
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	for scanner.Scan() {
 		l = scanner.Text()

@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"github.com/gorilla/mux"
 	"os/exec"
 	"simbookee/restic-gui/models"
@@ -22,7 +23,7 @@ func SnapShotsHandler(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(v["backup_id"])
 
 	credentials, err := models.GetBackupDetails(id)
-	utils.Check(err, "")
+	utils.Check(err, "fatal")
 	if err != nil {
 		response.Status = 403
 		response.Data = "Bad request"
@@ -34,7 +35,7 @@ func SnapShotsHandler(w http.ResponseWriter, r *http.Request) {
 
 	opt := Opt{"path": credentials["source"]}
 	snapshots, err := GetSnapshots(opt)
-	utils.Check(err, "")
+	utils.Check(err, "fatal")
 	response.Data = snapshots
 	json.NewEncoder(w).Encode(response)
 }
@@ -45,7 +46,8 @@ func GetSnapshots(opt map[string]string) (Rows, error) {
 	var cmd = "restic snapshots --path=" + opt["path"]
 
 	out, err := exec.Command("bash", "-c", cmd).Output()
-	utils.Check(err, "")
+	fmt.Println(err)
+	utils.Check(err, "fatal")
 
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	for scanner.Scan() {

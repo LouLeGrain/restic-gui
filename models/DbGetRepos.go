@@ -32,6 +32,7 @@ func GetRepositories() (Repos, error) {
 		var item Repository
 		err = rows.Scan(&repository_id, &created, &path, &password, &kind, &data)
 		utils.Check(err, "fatal")
+
 		item = Repository{
 			repository_id,
 			created,

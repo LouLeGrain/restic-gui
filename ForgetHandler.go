@@ -19,7 +19,7 @@ func ForgetHandler(w http.ResponseWriter, r *http.Request) {
 	buid, _ := strconv.Atoi(v["backup_id"])
 
 	credentials, err := models.GetBackupDetails(buid)
-	utils.Check(err, "")
+	utils.Check(err, "fatal")
 
 	if err != nil {
 		response.Status = 403
@@ -40,6 +40,6 @@ func ForgetHandler(w http.ResponseWriter, r *http.Request) {
 func ForgetBackup(opt map[string]string) (string, error) {
 	var cmd = "restic -r " + os.Getenv("RESTIC_REPOSITORY") + " forget " + opt["id"]
 	resp, err := exec.Command("bash", "-c", cmd).Output()
-	utils.Check(err, "")
+	utils.Check(err, "fatal")
 	return string(resp), err
 }

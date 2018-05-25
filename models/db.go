@@ -17,7 +17,7 @@ func GetDb(t string) (bool, error) {
 	switch t {
 	case "sqlite":
 		_, err := sqliteConnect()
-		utils.Check(err, "")
+		utils.Check(err, "fatal")
 	}
 
 	return true, nil
@@ -37,6 +37,7 @@ func sqliteConnect() (bool, error) {
 	Db = db
 	if isNew == true {
 		sqliteMigrate()
+
 	}
 
 	return true, nil
@@ -48,6 +49,7 @@ func sqliteMigrate() {
 		CREATE TABLE IF NOT EXISTS repositories (
 			 repository_id integer,
 			 created integer NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			 name text,
 			 path text,
 			 password text,
 			 type text DEFAULT 'local',
@@ -75,16 +77,16 @@ func sqliteMigrate() {
 		CREATE UNIQUE INDEX data_source_source_id_key_uindex ON data (source, source_id, key);
 		PRAGMA foreign_keys = true;
 		
-		INSERT INTO repositories (path, password) VALUES ('/backups','secretpasswd');
+		INSERT INTO repositories (name, path, password) VALUES ('Local Destination', '/backups','secretpasswd');
 		INSERT INTO backups (repository_id, name, source, status) VALUES (1, 'My Home Dir', '~/', 1);
 		`
 
 	_, err := Db.Exec(sql)
-	utils.Check(err, "")
+	utils.Check(err, "fatal")
 	Db.Close()
 
 	_, err = sqliteConnect()
-	utils.Check(err, "")
+	utils.Check(err, "fatal")
 }
 
 func Check(err error) {

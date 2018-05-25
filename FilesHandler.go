@@ -30,7 +30,7 @@ func FilesHandler(w http.ResponseWriter, r *http.Request) {
 	buid, _ := strconv.Atoi(v["backup_id"])
 
 	credentials, err := models.GetBackupDetails(buid)
-	utils.Check(err, "")
+	utils.Check(err, "fatal")
 
 	if err != nil {
 		response.Status = 403
@@ -42,10 +42,10 @@ func FilesHandler(w http.ResponseWriter, r *http.Request) {
 	utils.SetEnvVars(credentials)
 	opt := Opt{"id": snid, "path": credentials["source"]}
 	files, err := GetRestoreFiles(opt)
-	utils.Check(err, "")
+	utils.Check(err, "fatal")
 
 	snfiles, err := BuildFilesData(files)
-	utils.Check(err, "")
+	utils.Check(err, "fatal")
 
 	response.Data = snfiles
 	json.NewEncoder(w).Encode(response)
@@ -55,7 +55,7 @@ func GetRestoreFiles(opt map[string]string) (Files, error) {
 	filerows := []string{}
 	var cmd = "restic -r " + os.Getenv("RESTIC_REPOSITORY") + " ls " + opt["id"]
 	out, err := exec.Command("bash", "-c", cmd).Output()
-	utils.Check(err, "")
+	utils.Check(err, "fatal")
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	for scanner.Scan() {
 		filerows = append(filerows, scanner.Text())
