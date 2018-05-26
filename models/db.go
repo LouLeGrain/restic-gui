@@ -36,14 +36,20 @@ func sqliteConnect() (bool, error) {
 
 	Db = db
 	if isNew == true {
-		sqliteMigrate()
+		err := sqliteMigrate()
+		utils.Check(err, "fatal")
 
+		//initialize demo repository
+		/*os.Setenv("RESTIC_PASSWORD", "secretpasswd")
+		var cmd = "restic init --repo /backups"
+		_, err = exec.Command("bash", "-c", cmd).Output()
+		utils.Check(err, "fatal")*/
 	}
 
 	return true, nil
 }
 
-func sqliteMigrate() {
+func sqliteMigrate() (error) {
 	sql := `PRAGMA foreign_keys = false;
 		
 		CREATE TABLE IF NOT EXISTS repositories (
@@ -77,16 +83,19 @@ func sqliteMigrate() {
 		CREATE UNIQUE INDEX data_source_source_id_key_uindex ON data (source, source_id, key);
 		PRAGMA foreign_keys = true;
 		
-		INSERT INTO repositories (name, path, password) VALUES ('Local Destination', '/backups','secretpasswd');
-		INSERT INTO backups (repository_id, name, source, status) VALUES (1, 'My Home Dir', '~/', 1);
+		--Initialze demo repo data
+		--INSERT INTO repositories (name, path, password) VALUES ('Local Destination', '/backups','secretpasswd');
+		--INSERT INTO backups (repository_id, name, source, status) VALUES (1, 'My Home Dir', '~/', 1);
 		`
 
 	_, err := Db.Exec(sql)
-	utils.Check(err, "fatal")
+	utils.Check(err, "")
 	Db.Close()
 
 	_, err = sqliteConnect()
-	utils.Check(err, "fatal")
+	utils.Check(err, "")
+
+	return err
 }
 
 func Check(err error) {

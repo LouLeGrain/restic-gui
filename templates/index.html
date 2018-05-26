@@ -7,13 +7,13 @@
         </div>
         <div class="col-md-2">
             <h3>
-                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#destModal">Add Destination
+                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#srcModal">Add Backup
                 </button>
             </h3>
         </div>
         <div class="col-md-2">
             <h3>
-                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#srcModal">Add Backup
+                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#destModal">Add Destination
                 </button>
             </h3>
         </div>
@@ -102,10 +102,10 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label for="destName">Destation Name</label>
+                            <label for="destName">Destination Name</label>
                             <input type="text" class="form-control" id="destName" aria-describedby="destNameHelp"
                                    placeholder="Name">
-                            <small id="destNameHelp" class="form-text text-muted">Please choose a for easy
+                            <small id="destNameHelp" class="form-text text-muted">Please choose for easy
                                 identifiction.
                             </small>
                         </div>
@@ -121,9 +121,6 @@
                                 <option value="bb">BackBlaze</option>
                                 <option value="s3">AWS S3</option>
                             </select>
-                            <small id="destHelp" class="form-text text-muted">Certain destinations types require
-                                additional options.
-                            </small>
                         </div>
                     </div>
                 </div>
@@ -133,9 +130,6 @@
                             <label for="destPasswd">Destination Password</label>
                             <input type="text" class="form-control" id="destPasswd" aria-describedby="destPasswdHelp"
                                    placeholder="Password">
-                            <small id="destPasswdHelp" class="form-text text-muted">Please choose a password to encrypt
-                                your backup.
-                            </small>
                         </div>
                     </div>
                 </div>
@@ -161,29 +155,26 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label for="srcName">Name</label>
+                            <label for="srcName">Backup Name</label>
                             <input type="text" class="form-control" id="srcName" aria-describedby="srcNameHelp"
                                    placeholder="Name">
-                            <small id="srcNameHelp" class="form-text text-muted">Please give your backup a name.</small>
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label for="src">Location</label>
+                            <label for="src">Backup Source</label>
                             <input type="text" class="form-control" id="src" aria-describedby="srcHelp"
                                    placeholder="Source Path">
-                            <small id="srcHelp" class="form-text text-muted">Please enter the source path!</small>
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label for="dest">Select the backup destination</label>
-                            <select class="form-control" id="dest" aria-describedby="destHelp"></select>
-                            <small id="destHelp" class="form-text text-muted">Please pick a backup destation.</small>
+                            <label for="destType">Select the backup destination</label>
+                            <select class="form-control" id="destType" aria-describedby="destHelp"></select>
                         </div>
                     </div>
                 </div>
@@ -202,32 +193,39 @@
     $(document).ready(function () {
 
         $('#save-repo').on('click', function () {
+            var xtra = {};
+            $('#dest-extra-data input').each(function () {
+                xtra[this.id] = $(this).val()
+            })
+
             var data = {
-                path: $('#destPath').val(),
-                password: $('#destPasswd').val(),
-                name: $('#destName').val(),
-                type: $('#destType').val()
+                Password: $('#destPasswd').val(),
+                Name: $('#destName').val(),
+                Type: $('#destType').val(),
+                Data: xtra
             };
             console.log(data);
             var jqxhr = $.ajax({
                 type: "POST",
-                url: "/api/repositories",
-                data: data,
+                contentType: 'application/json',
+                url: "/api/repositories/new",
+                data: JSON.stringify(data),
                 dataType: "json"
-            });
-
-            jqxhr.done(function (response) {
+            }).done(function (response) {
                 console.log(response);
-            });
-
-            jqxhr.fail(function (jqXHR, textStatus) {
+            }).fail(function (jqXHR, textStatus) {
                 alert("Request failed: " + textStatus);
             });
         });
 
-        $('#destModal').modal('handleUpdate')
+        $('#destType').on('change', function () {
+            var sect = $('#dest-extra-data').empty();
+            var repoType = $('#destType option:selected').val() + "DataFields";
+            var fn = window[repoType];
+            if (typeof fn === "function") fn();
+        })
 
-        $('#srcModal').modal('handleUpdate')
+        $('#destModal').modal('handleUpdate')
 
         $('#destModal').on('shown.bs.modal', function (e) {
             var repoType = $('#destType option:selected').val() + "DataFields";
@@ -239,17 +237,11 @@
             $('#dest-extra-data').empty();
         })
 
-        $('#destType').on('change', function () {
-            var sect = $('#dest-extra-data').empty();
-            var repoType = $('#destType option:selected').val() + "DataFields";
-            var fn = window[repoType];
-            if (typeof fn === "function") fn();
-        })
-
         $('#srcModal').on('show.bs.modal', function (e) {
             var modal = $(this)
             var select = modal.find('.modal-body #destType')
             select.find('option').remove()
+
             var jqxhr = $.ajax({
                 type: "GET",
                 url: "/api/repositories",
@@ -258,11 +250,12 @@
             });
 
             jqxhr.done(function (response) {
+                console.log(response);
                 if (response.status == 200) {
                     $.each(response.data, function (key, item) {
                         select.append($("<option/>", {
                             value: item.id,
-                            text: item.path
+                            text: item.path + " (" + item.kind + ") "
                         }));
                     });
                 }

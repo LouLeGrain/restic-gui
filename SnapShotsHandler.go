@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"github.com/gorilla/mux"
 	"os/exec"
 	"simbookee/restic-gui/models"
@@ -46,7 +45,7 @@ func GetSnapshots(opt map[string]string) (Rows, error) {
 	var cmd = "restic snapshots --path=" + opt["path"]
 
 	out, err := exec.Command("bash", "-c", cmd).Output()
-	fmt.Println(err)
+
 	utils.Check(err, "fatal")
 
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
