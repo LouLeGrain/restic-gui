@@ -48,7 +48,7 @@ func GetRepositories() (Repos, error) {
 	return items, nil
 }
 
-func AddRepository(repoData Repository) (int64, error) {
+func AddRepository(repoData Repository) (int, error) {
 	sql := "INSERT INTO repositories (name, path, password, type, data) VALUES (?,?,?,?,?);"
 	stmt, err := Db.Prepare(sql)
 	res, err := stmt.Exec(repoData.Name, repoData.Path, repoData.Passwd, repoData.Kind, repoData.Data)
@@ -56,5 +56,5 @@ func AddRepository(repoData Repository) (int64, error) {
 	repoId, err := res.LastInsertId()
 	utils.Check(err, "")
 
-	return repoId, nil
+	return int(repoId), nil
 }

@@ -8,8 +8,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"unicode"
 	"runtime"
+	"unicode"
 )
 
 func CompileCommand(data map[string]string) (string, error) {

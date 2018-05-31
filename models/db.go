@@ -49,7 +49,7 @@ func sqliteConnect() (bool, error) {
 	return true, nil
 }
 
-func sqliteMigrate() (error) {
+func sqliteMigrate() error {
 	sql := `PRAGMA foreign_keys = false;
 		
 		CREATE TABLE IF NOT EXISTS repositories (
@@ -70,6 +70,7 @@ func sqliteMigrate() (error) {
 			 name text,
 			 source text,
 			 status integer,
+			 data text DEFAULT '{}',
 			PRIMARY KEY("backup_id")
 		);
 

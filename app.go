@@ -25,21 +25,24 @@ func main() {
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
 	r.PathPrefix("/runtime/").Handler(http.StripPrefix("/runtime/", http.FileServer(http.Dir("./runtime/"))))
 
-	//routes
+	//routes GET
 	r.HandleFunc("/", IndexHandler).Methods("GET")
 	r.HandleFunc("/api/repositories", RepositoryHandler).Methods("GET")
-	r.HandleFunc("/api/repositories/new", CreateRepositoryHandler).Methods("POST")
-	r.HandleFunc("/api/newbackup", CreateBackupHandler).Methods("POST")
 	r.HandleFunc("/api/snapshots/{backup_id}", SnapShotsHandler).Methods("GET")
 	r.HandleFunc("/api/snapshots/new/{backup_id}", BackupHandler).Methods("GET")
 	r.HandleFunc("/api/snapshots/forget/{backup_id}/{snapshot_id}", ForgetHandler).Methods("GET")
 	r.HandleFunc("/api/snapshots/prune/{backup_id}", PruneHandler).Methods("GET")
 	r.HandleFunc("/api/files/{backup_id}/{snapshot_id}", FilesHandler).Methods("GET")
 
+	//routes POST
+	r.HandleFunc("/api/repositories/new", InitRepositoryHandler).Methods("POST")
+	r.HandleFunc("/api/backup/new", InitBackupHandler).Methods("POST")
+
 	//test route
 	r.HandleFunc("/test", TestHandler).Methods("GET")
 	http.Handle("/", r)
 
+	//open default browser
 	utils.OpenBrowser("http://localhost" + getPort() + "/")
 	//run app
 	log.Fatal(http.ListenAndServe(getPort(), r))

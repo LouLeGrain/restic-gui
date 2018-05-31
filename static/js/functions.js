@@ -1,3 +1,15 @@
+function validateRepo(repoData) {
+    var rules = {name: ['empty'], path: ['empty'], passwd: ['empty'], type: ['empty']}
+    var res = true
+    return res;
+}
+
+function validateBackup(backupData) {
+    var rules = {name: ['name'], path: ['source'], passwd: ['destination'], type: ['empty']}
+    var res = true
+    return res;
+}
+
 function localDataFields() {
     var form = $('#dest-extra-data')
     form.append("<div class =\"row\">\n" +
@@ -35,7 +47,6 @@ function sftpDataFields() {
         "       </div>\n" +
         "    </div>")
 }
-
 
 function bbDataFields() {
     var form = $('#dest-extra-data')

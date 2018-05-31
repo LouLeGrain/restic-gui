@@ -7,6 +7,14 @@ import (
 	"strconv"
 )
 
+type BackupData struct {
+	RepoId int    `json:"repo_id"`
+	Name   string `json:"name"`
+	Source string `json:"source"`
+	Status int    `json:"status"`
+	Data   string `json:"data"`
+}
+
 type Backup struct {
 	Id       int    `json:"id"`
 	Created  string `json:"created"`
@@ -82,4 +90,15 @@ func GetBackupDetails(id int) (map[string]string, error) {
 	}
 
 	return m, err
+}
+
+func AddBackup(buData BackupData) (int, error) {
+	sql := "INSERT INTO backups (name, source, repository_id, status) VALUES (?,?,?,?);"
+	stmt, err := Db.Prepare(sql)
+	res, err := stmt.Exec(buData.Name, buData.Source, buData.RepoId, buData.Status)
+	utils.Check(err, "")
+	repoId, err := res.LastInsertId()
+	utils.Check(err, "")
+
+	return int(repoId), nil
 }

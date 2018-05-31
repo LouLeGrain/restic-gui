@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"os"
 	"os/exec"
@@ -34,7 +33,7 @@ func RepositoryHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func CreateRepositoryHandler(w http.ResponseWriter, r *http.Request) {
+func InitRepositoryHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	response := JsonResponse{200, nil}
 
@@ -49,27 +48,26 @@ func CreateRepositoryHandler(w http.ResponseWriter, r *http.Request) {
 
 	repoId, err := ResticRepoInit()
 
-	response.Data = map[string]int64{"repoId": repoId}
+	response.Data = map[string]int{"repoId": repoId}
 	json.NewEncoder(w).Encode(response)
-
 }
 
-func ResticRepoInit() (int64, error) {
-	var repoId int64
+func ResticRepoInit() (int, error) {
+	var repoId int
 
 	os.Setenv("RESTIC_PASSWORD", RepoData.Password)
-	funcs := map[string]func() (error){"local": ResticLocalInit, "sftp": ResticSftpInit, "bb": ResticBBInit, "s3": ResticS3Init}
+	funcs := map[string]func() error{"local": ResticLocalInit, "sftp": ResticSftpInit, "bb": ResticBBInit, "s3": ResticS3Init}
 	err := funcs[RepoData.Type]()
 	utils.Check(err, "")
 
-	modelfuncs := map[string]func() (int64, error){"local": ResticLocalSave, "sftp": ResticSftpSave, "bb": ResticBBSave, "s3": ResticS3Save}
+	modelfuncs := map[string]func() (int, error){"local": ResticLocalSave, "sftp": ResticSftpSave, "bb": ResticBBSave, "s3": ResticS3Save}
 	repoId, err = modelfuncs[RepoData.Type]()
 	utils.Check(err, "")
 
 	return repoId, err
 }
 
-func ResticLocalInit() (error) {
+func ResticLocalInit() error {
 	var cmd = "restic init --repo " + RepoData.Data["path"]
 	_, err := exec.Command("bash", "-c", cmd).Output()
 	utils.Check(err, "")
@@ -77,52 +75,34 @@ func ResticLocalInit() (error) {
 	return err
 }
 
-func ResticSftpInit() (error) {
-
+func ResticSftpInit() error {
 	os.Setenv("RESTIC_PASSWORD", RepoData.Password)
-
 	var cmd = "restic init --repo " + RepoData.Data["path"]
-
-	out, err := exec.Command("bash", "-c", cmd).Output()
-
+	_, err := exec.Command("bash", "-c", cmd).Output()
 	utils.Check(err, "fatal")
-
-	fmt.Println(out)
 
 	return nil
 }
 
-func ResticBBInit() (error) {
-
+func ResticBBInit() error {
 	os.Setenv("RESTIC_PASSWORD", RepoData.Password)
-
 	var cmd = "restic init --repo " + RepoData.Data["path"]
-
-	out, err := exec.Command("bash", "-c", cmd).Output()
-
+	_, err := exec.Command("bash", "-c", cmd).Output()
 	utils.Check(err, "fatal")
-
-	fmt.Println(out)
 
 	return nil
 }
 
-func ResticS3Init() (error) {
-
+func ResticS3Init() error {
 	os.Setenv("RESTIC_PASSWORD", RepoData.Password)
-
 	var cmd = "restic init --repo " + RepoData.Data["path"]
-
-	out, err := exec.Command("bash", "-c", cmd).Output()
-
+	_, err := exec.Command("bash", "-c", cmd).Output()
 	utils.Check(err, "fatal")
-
-	fmt.Println(out)
 
 	return nil
 }
 
-func ResticLocalSave() (int64, error) {
+func ResticLocalSave() (int, error) {
 	var repoData models.Repository
 
 	repoData.Name = RepoData.Name
@@ -138,7 +118,7 @@ func ResticLocalSave() (int64, error) {
 	return repoId, err
 }
 
-func ResticSftpSave() (int64, error) {
+func ResticSftpSave() (int, error) {
 	var repoData models.Repository
 
 	repoData.Name = RepoData.Name
@@ -154,7 +134,7 @@ func ResticSftpSave() (int64, error) {
 	return repoId, err
 }
 
-func ResticBBSave() (int64, error) {
+func ResticBBSave() (int, error) {
 	var repoData models.Repository
 
 	repoData.Name = RepoData.Name
@@ -170,7 +150,7 @@ func ResticBBSave() (int64, error) {
 	return repoId, err
 }
 
-func ResticS3Save() (int64, error) {
+func ResticS3Save() (int, error) {
 	var repoData models.Repository
 
 	repoData.Name = RepoData.Name
