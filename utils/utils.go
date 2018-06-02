@@ -42,7 +42,14 @@ func CheckProgExists(name string) (bool, error) {
 
 func Check(err error, typ string) error {
 	if err != nil {
+		logFile, err := os.OpenFile("./data/error.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		if err != nil {
+			log.Fatalf("error opening file: %v", err)
+		}
+		defer logFile.Close()
+		log.SetOutput(logFile)
 		log.Println(err)
+
 		if typ == "fatal" {
 			panic(err)
 		}

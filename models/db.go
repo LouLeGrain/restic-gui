@@ -8,7 +8,7 @@ import (
 	"simbookee/restic-gui/utils"
 )
 
-const DB_PATH = "./backups.db"
+const DB_PATH = "backups.db"
 
 var DbPath string
 var Db *sql.DB
@@ -23,14 +23,18 @@ func GetDb(t string) (bool, error) {
 	return true, nil
 }
 
+func getDbPath() string {
+	return "./data/" + DB_PATH
+}
+
 func sqliteConnect() (bool, error) {
 	isNew := false
-	if _, err := os.Stat(DB_PATH); os.IsNotExist(err) {
+	if _, err := os.Stat(getDbPath()); os.IsNotExist(err) {
 		isNew = true
 	}
-	db, err := sql.Open("sqlite3", DB_PATH)
+	db, err := sql.Open("sqlite3", getDbPath())
 	if err != nil || db == nil {
-		log.Printf("%+v\n", err)
+		log.Fatal("%+v\n", err)
 		panic(err)
 	}
 

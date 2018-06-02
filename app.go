@@ -26,20 +26,20 @@ func main() {
 	r.PathPrefix("/runtime/").Handler(http.StripPrefix("/runtime/", http.FileServer(http.Dir("./runtime/"))))
 
 	//routes GET
-	r.HandleFunc("/", IndexHandler).Methods("GET")
-	r.HandleFunc("/api/repositories", RepositoryHandler).Methods("GET")
-	r.HandleFunc("/api/snapshots/{backup_id}", SnapShotsHandler).Methods("GET")
-	r.HandleFunc("/api/snapshots/new/{backup_id}", BackupHandler).Methods("GET")
-	r.HandleFunc("/api/snapshots/forget/{backup_id}/{snapshot_id}", ForgetHandler).Methods("GET")
-	r.HandleFunc("/api/snapshots/prune/{backup_id}", PruneHandler).Methods("GET")
-	r.HandleFunc("/api/files/{backup_id}/{snapshot_id}", FilesHandler).Methods("GET")
+	r.HandleFunc("/", utils.Chain(IndexHandler, utils.Logging())).Methods("GET")
+	r.HandleFunc("/api/repositories", utils.Chain(RepositoryHandler, utils.Logging())).Methods("GET")
+	r.HandleFunc("/api/snapshots/{backup_id}", utils.Chain(SnapShotsHandler, utils.Logging())).Methods("GET")
+	r.HandleFunc("/api/snapshots/new/{backup_id}", utils.Chain(BackupHandler, utils.Logging())).Methods("GET")
+	r.HandleFunc("/api/snapshots/forget/{backup_id}/{snapshot_id}", utils.Chain(ForgetHandler, utils.Logging())).Methods("GET")
+	r.HandleFunc("/api/snapshots/prune/{backup_id}", utils.Chain(PruneHandler, utils.Logging())).Methods("GET")
+	r.HandleFunc("/api/files/{backup_id}/{snapshot_id}", utils.Chain(FilesHandler, utils.Logging())).Methods("GET")
 
 	//routes POST
-	r.HandleFunc("/api/repositories/new", InitRepositoryHandler).Methods("POST")
-	r.HandleFunc("/api/backup/new", InitBackupHandler).Methods("POST")
+	r.HandleFunc("/api/repositories/new", utils.Chain(InitRepositoryHandler, utils.Logging())).Methods("POST")
+	r.HandleFunc("/api/backup/new", utils.Chain(InitBackupHandler, utils.Logging())).Methods("POST")
 
 	//test route
-	r.HandleFunc("/test", TestHandler).Methods("GET")
+	r.HandleFunc("/test", utils.Chain(TestHandler, utils.Logging())).Methods("GET")
 	http.Handle("/", r)
 
 	//open default browser
@@ -48,6 +48,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(getPort(), r))
 }
 
+// renders the template
 func render(w http.ResponseWriter, tmpl string, p PageData, l string) {
 	if l == "" {
 		l = "layout"
@@ -74,6 +75,7 @@ func render(w http.ResponseWriter, tmpl string, p PageData, l string) {
 	}
 }
 
+//get port from ENV or use default
 func getPort() string {
 	p := os.Getenv("RESTIC_PORT")
 	if p != "" {
