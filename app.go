@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"simbookee/restic-gui/middleware"
 	"simbookee/restic-gui/models"
 	"simbookee/restic-gui/utils"
 )
@@ -26,20 +27,19 @@ func main() {
 	r.PathPrefix("/runtime/").Handler(http.StripPrefix("/runtime/", http.FileServer(http.Dir("./runtime/"))))
 
 	//routes GET
-	r.HandleFunc("/", utils.Chain(IndexHandler, utils.Logging())).Methods("GET")
-	r.HandleFunc("/api/repositories", utils.Chain(RepositoryHandler, utils.Logging())).Methods("GET")
-	r.HandleFunc("/api/snapshots/{backup_id}", utils.Chain(SnapShotsHandler, utils.Logging())).Methods("GET")
-	r.HandleFunc("/api/snapshots/new/{backup_id}", utils.Chain(BackupHandler, utils.Logging())).Methods("GET")
-	r.HandleFunc("/api/snapshots/forget/{backup_id}/{snapshot_id}", utils.Chain(ForgetHandler, utils.Logging())).Methods("GET")
-	r.HandleFunc("/api/snapshots/prune/{backup_id}", utils.Chain(PruneHandler, utils.Logging())).Methods("GET")
-	r.HandleFunc("/api/files/{backup_id}/{snapshot_id}", utils.Chain(FilesHandler, utils.Logging())).Methods("GET")
+	r.HandleFunc("/", middleware.Chain(IndexHandler, middleware.Logging())).Methods("GET")
+	r.HandleFunc("/test", middleware.Chain(TestHandler, middleware.Logging())).Methods("GET")
+	r.HandleFunc("/api/repositories", middleware.Chain(RepositoryHandler, middleware.Logging())).Methods("GET")
+	r.HandleFunc("/api/repositories/new", middleware.Chain(InitRepositoryHandler, middleware.Logging())).Methods("POST")
+	r.HandleFunc("/api/snapshots/{backup_id}", middleware.Chain(SnapShotsHandler, middleware.Logging())).Methods("GET")
+	r.HandleFunc("/api/snapshots/new/{backup_id}", middleware.Chain(BackupHandler, middleware.Logging())).Methods("GET")
+	r.HandleFunc("/api/snapshots/forget/{backup_id}/{snapshot_id}", middleware.Chain(ForgetHandler, middleware.Logging())).Methods("GET")
+	r.HandleFunc("/api/snapshots/prune/{backup_id}", middleware.Chain(PruneHandler, middleware.Logging())).Methods("GET")
+	r.HandleFunc("/api/files/{backup_id}/{snapshot_id}", middleware.Chain(FilesHandler, middleware.Logging())).Methods("GET")
+	r.HandleFunc("/api/backup/new", middleware.Chain(InitBackupHandler, middleware.Logging())).Methods("POST")
+	r.HandleFunc("/api/backup/delete/{backup_id}", middleware.Chain(DeleteBackupHandler, middleware.Logging())).Methods("POST")
 
-	//routes POST
-	r.HandleFunc("/api/repositories/new", utils.Chain(InitRepositoryHandler, utils.Logging())).Methods("POST")
-	r.HandleFunc("/api/backup/new", utils.Chain(InitBackupHandler, utils.Logging())).Methods("POST")
-
-	//test route
-	r.HandleFunc("/test", utils.Chain(TestHandler, utils.Logging())).Methods("GET")
+	//handle request
 	http.Handle("/", r)
 
 	//open default browser
@@ -53,22 +53,17 @@ func render(w http.ResponseWriter, tmpl string, p PageData, l string) {
 	if l == "" {
 		l = "layout"
 	}
-
 	layout := "templates/" + l + ".html"
-
 	tmpl = fmt.Sprintf("templates/%s", tmpl)    // prefix the name passed in with templates/
 	t, err := template.ParseFiles(tmpl, layout) //parse the template file held in the templates folder
-
-	if err != nil { // if there is an error
+	if err != nil {                             // if there is an error
 		log.Print("template parsing error: ", err) // log it
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
-
 	if l != "" {
 		//execute the template and pass in the variables to fill the gaps
 		err = t.ExecuteTemplate(w, l, p)
 	}
-
 	if err != nil { // if there is an error
 		log.Print("template executing error: ", err) //log it
 		http.Error(w, err.Error(), http.StatusInternalServerError)

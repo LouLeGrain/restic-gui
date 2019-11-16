@@ -54,6 +54,25 @@ func RunBackup(id int) (bool, error) {
 	return NewBackup(opt)
 }
 
+func DeleteBackupHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	response := JsonResponse{200, nil}
+	v := mux.Vars(r)
+
+	id, _ := strconv.Atoi(v["backup_id"])
+
+	backup, err := RunBackup(id)
+	if err != nil {
+		response.Status = 403
+		response.Data = "Bad request"
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	response.Data = backup
+	json.NewEncoder(w).Encode(response)
+}
+
 func NewBackup(opt map[string]string) (bool, error) {
 	var ret = false
 	var l string

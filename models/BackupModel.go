@@ -20,6 +20,7 @@ type Backup struct {
 	Created  string `json:"created"`
 	RepoId   int    `json:"repo_id"`
 	RepoPath string `json:"repo_path"`
+	RepoName string `json:"repo_name"`
 	Type     string `json:"type"`
 	Name     string `json:"name"`
 	Source   string `json:"source"`
@@ -30,7 +31,7 @@ type Backups map[int]Backup
 
 func GetBackups() (Backups, error) {
 	var items = map[int]Backup{}
-	query := "SELECT b.backup_id, b.created, b.repository_id, r.path, r.type, b.name, b.source, b.status " +
+	query := "SELECT b.backup_id, b.created, b.repository_id, r.path, r.name, r.type, b.name, b.source, b.status " +
 		"FROM backups AS b JOIN repositories AS r USING(repository_id) ORDER BY b.repository_id, b.name"
 
 	rows, err := Db.Query(query)
@@ -39,6 +40,7 @@ func GetBackups() (Backups, error) {
 	var created string
 	var repository_id int
 	var path string
+	var repoName string
 	var repoType string
 	var name string
 	var source string
@@ -47,13 +49,14 @@ func GetBackups() (Backups, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var item Backup
-		err = rows.Scan(&backup_id, &created, &repository_id, &path, &repoType, &name, &source, &status)
+		err = rows.Scan(&backup_id, &created, &repository_id, &path, &repoName, &repoType, &name, &source, &status)
 		utils.Check(err, "fatal")
 		item = Backup{
 			backup_id,
 			created,
 			repository_id,
 			path,
+			repoName,
 			utils.UcFirst(repoType),
 			name,
 			source,

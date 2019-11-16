@@ -31,13 +31,13 @@ func ForgetHandler(w http.ResponseWriter, r *http.Request) {
 	utils.SetEnvVars(credentials)
 	opt := Opt{"id": snid}
 
-	result, err := ForgetBackup(opt)
+	result, err := ForgetSnapshot(opt)
 	response.Data = result
 	json.NewEncoder(w).Encode(response)
 
 }
 
-func ForgetBackup(opt map[string]string) (string, error) {
+func ForgetSnapshot(opt map[string]string) (string, error) {
 	var cmd = "restic -r " + os.Getenv("RESTIC_REPOSITORY") + " forget " + opt["id"]
 	resp, err := exec.Command("bash", "-c", cmd).Output()
 	utils.Check(err, "fatal")

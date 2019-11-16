@@ -15,7 +15,7 @@ function localDataFields() {
     form.append("<div class =\"row\">\n" +
         "       <div class=\"col-md-12\">\n" +
         "           <div class=\"form-group\">\n" +
-        "               <label for=\"path\">Destination Path</label>\n" +
+        "               <label for=\"path\">Repository Path</label>\n" +
         "               <input type=\"text\" class=\"form-control\" id=\"path\" aria-describedby=\"pathHelp\" placeholder=\"/path/to/backup\">\n" +
         "           </div>\n" +
         "       </div>\n" +
@@ -27,21 +27,21 @@ function sftpDataFields() {
     form.append("<div class =\"row\">\n" +
         "       <div class=\"col-md-12\">\n" +
         "           <div class=\"form-group\">\n" +
-        "               <label for=\"server\">Destination Server</label>\n" +
+        "               <label for=\"server\">Repository Server</label>\n" +
         "               <input type=\"text\" class=\"form-control\" id=\"server\" aria-describedby=\"pathHelp\" placeholder=\"host\">\n" +
         "           </div>\n" +
         "       </div>\n" +
         "    </div>").append("<div class =\"row\">\n" +
         "       <div class=\"col-md-12\">\n" +
         "           <div class=\"form-group\">\n" +
-        "               <label for=\"user\">Destination User</label>\n" +
+        "               <label for=\"user\">Repository User</label>\n" +
         "               <input type=\"text\" class=\"form-control\" id=\"user\" aria-describedby=\"pathHelp\" placeholder=\"user_name\">\n" +
         "           </div>\n" +
         "       </div>\n" +
         "    </div>").append("<div class =\"row\">\n" +
         "       <div class=\"col-md-12\">\n" +
         "           <div class=\"form-group\">\n" +
-        "               <label for=\"path\">Destination Path</label>\n" +
+        "               <label for=\"path\">Repository Path</label>\n" +
         "               <input type=\"text\" class=\"form-control\" id=\"path\" aria-describedby=\"pathHelp\" placeholder=\"/path/to/backup\">\n" +
         "           </div>\n" +
         "       </div>\n" +
@@ -74,7 +74,7 @@ function bbDataFields() {
         "    </div>").append("<div class =\"row\">\n" +
         "       <div class=\"col-md-12\">\n" +
         "           <div class=\"form-group\">\n" +
-        "               <label for=\"path\">Destination Path</label>\n" +
+        "               <label for=\"path\">Repository Path</label>\n" +
         "               <input type=\"text\" class=\"form-control\" id=\"path\" aria-describedby=\"pathHelp\" placeholder=\"/path/to/backup\">\n" +
         "           </div>\n" +
         "       </div>\n" +
@@ -107,7 +107,7 @@ function s3DataFields() {
         "    </div>").append("<div class =\"row\">\n" +
         "       <div class=\"col-md-12\">\n" +
         "           <div class=\"form-group\">\n" +
-        "               <label for=\"path\">Destination Path</label>\n" +
+        "               <label for=\"path\">Repository Path</label>\n" +
         "               <input type=\"text\" class=\"form-control\" id=\"path\" aria-describedby=\"pathHelp\" placeholder=\"/path/to/backup\">\n" +
         "           </div>\n" +
         "       </div>\n" +

@@ -7,13 +7,15 @@
         </div>
         <div class="col-md-2">
             <h3>
-                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#srcModal">Add Backup
+                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#srcModal">
+                    Add Backup Folder
                 </button>
             </h3>
         </div>
         <div class="col-md-2">
             <h3>
-                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#destModal">Add Destination
+                <button type="button" class="btn btn-light" data-toggle="modal" data-target="#destModal">
+                    Add Repository
                 </button>
             </h3>
         </div>
@@ -34,26 +36,29 @@
         <div class="col-md-9">
             <div class="main-view" id="backup" style="display:none;">
                 <div class="row">
-                    <h5 class="col-md-9" id="bu-name"></h5>
-                    <h5 class="col-md-2"><a href="#" class="badge badge-secondary new-bu" id="bu-button"> New
-                        Backup </a></h5>
+                    <h4 class="col-md-9" id="bu-name"></h4>
+                    <h4 class="col-md-2">
+                        <a href="#" class="badge badge-secondary new-bu" id="bu-button">
+                            New Snapshot 
+                        </a>
+                    </h4>
                 </div>
                 <div class="row">
                     <div class="col-md-3">Backup started:</div>
                     <div class="col-md-6" id="bu-created"></div>
                 </div>
                 <div class="row">
-                    <div class="col-md-3">Location:</div>
+                    <div class="col-md-3">Source Location:</div>
                     <div class="col-md-6" id="bu-loc"></div>
                     <div class="col-md-3">
-                        <a href="#" class="badge badge-light" id="bu-prune"> Refresh </a>
+                            <a href="#" class="badge badge-light" id="bu-change"> Change </a>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-3">Destination:</div>
+                    <div class="col-md-3">Repository:</div>
                     <div class="col-md-6" id="repo-path"></div>
                     <div class="col-md-3">
-                        <a href="#" class="badge badge-light" id="bu-change"> Change </a>
+                        <a href="#" class="badge badge-light" id="bu-prune"> Refresh </a>
                     </div>
                 </div>
                 <div class="row">
@@ -97,7 +102,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Add new backup destination</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Add new backup repository</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -106,7 +111,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label for="destName">Destination Name</label>
+                            <label for="destName">Repository Name</label>
                             <input type="text" class="form-control" id="destName" aria-describedby="destNameHelp"
                                    placeholder="Name">
                             <small id="destNameHelp" class="form-text text-muted">Please choose for easy
@@ -118,7 +123,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label for="destType">Pick a destination type</label>
+                            <label for="destType">Pick a repository type</label>
                             <select class="form-control" id="destType" aria-describedby="destHelp">
                                 <option value="local">Local Folder</option>
                                 <option value="sftp">SFTP Server</option>
@@ -131,7 +136,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label for="destPasswd">Destination Password</label>
+                            <label for="destPasswd">Repository Password</label>
                             <input type="text" class="form-control" id="destPasswd" aria-describedby="destPasswdHelp"
                                    placeholder="Password">
                         </div>
@@ -168,7 +173,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label for="src">Backup Source</label>
+                            <label for="src">Backup Source Folder</label>
                             <input type="text" class="form-control" id="src" aria-describedby="srcHelp"
                                    placeholder="Source Path">
                         </div>
@@ -177,7 +182,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="form-group">
-                            <label for="repoId">Select the backup destination</label>
+                            <label for="repoId">Select the backup repository</label>
                             <select class="form-control" id="repoId" aria-describedby="destHelp"></select>
                         </div>
                     </div>
@@ -203,7 +208,6 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
-
         $('#save-backup').on('click', function () {
             var xtra = {};
             $('#src-extra-data input').each(function () {
@@ -359,6 +363,26 @@
             })
         })
 
+        $('#bu-delete').on('click', function (e) {
+            e.preventDefault()
+            $.ajax({
+                type: "POST",
+                url: "/api/backup/delete/" + prop,
+                // The key needs to match your method's input parameter (case-sensitive).
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (data) {
+                    if (data.status == 200) {
+                        $('#backup').hide()
+                        $('#message h5').html('Repository refreshed')
+                        $('#message h5').addClass('alert-success')
+                        $('#message').show()
+                        $('#message').delay(2000).fadeOut("slow");
+                    }
+                }
+            })
+        })
+
         $('#delete').on('click', function (e) {
             e.preventDefault()
             $('#files').hide()
@@ -484,7 +508,7 @@
             $('#bu-name').html(bu.name)
             $('#bu-created').html(bu.created)
             $('#bu-loc').html(bu.source)
-            $('#repo-path').html(bu.repo_path)
+            $('#repo-path').html(bu.repo_name + ' &nbsp; ( ' + bu.repo_path + ' )')
             $('#repo-type').html(bu.type)
             $('#bu-button').attr('backup-id', prop)
             getSnapshots(bu)

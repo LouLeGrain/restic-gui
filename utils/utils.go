@@ -17,7 +17,6 @@ func CompileCommand(data map[string]string) (string, error) {
 	var command string = "restic "
 
 	return command, nil
-
 }
 
 func SetFile(path string, content string) (string, error) {
@@ -40,9 +39,20 @@ func CheckProgExists(name string) (bool, error) {
 	return ret, err
 }
 
+func getPath() (string) {
+	pwd, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	fmt.Println(pwd)
+
+	return pwd
+}
+
 func Check(err error, typ string) error {
 	if err != nil {
-		logFile, err := os.OpenFile("./data/error.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+		logFile, err := os.OpenFile(getPath()+"/data/error.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
 			log.Fatalf("error opening file: %v", err)
 		}
