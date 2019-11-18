@@ -9,9 +9,57 @@ import (
 	"simbookee/restic-gui/utils"
 	"strconv"
 	"strings"
-
 	"net/http"
+	"fmt"
 )
+func RestoreSnapShotsHandler (w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	response := JsonResponse{200, nil}
+
+	v := mux.Vars(r)
+	id, _ := strconv.Atoi(v["backup_id"])
+	snapshot, _ := v["snapshot_id"]
+	
+	credentials, err := models.GetBackupDetails(id)
+	utils.Check(err, "")
+	if err != nil {
+		response.Status = 403
+		response.Data = "Bad request"
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+	utils.SetEnvVars(credentials)
+
+	var p RestorePost
+	_ = json.NewDecoder(r.Body).Decode(&p)
+	
+	opt := Opt{
+		"snapshot": snapshot,
+		"path": p.Path,
+		"dest": p.Dest,
+		"file": p.File,
+	}
+
+	restore, err := runRestore(opt)
+	if err != nil {
+		response.Status = 403
+		response.Data = "Bad request"
+		json.NewEncoder(w).Encode(response)
+		return
+	}
+
+	response.Data = restore
+	json.NewEncoder(w).Encode(response)
+}
+
+func runRestore(opt Opt) (bool, error) {
+	var cmd = "restic restore " + opt["snapshot"] + " --path " + opt["path"] + " --include " + opt["file"] + " --target " + opt["dest"]
+	fmt.Println(cmd)
+	_, err := exec.Command("bash", "-c", cmd).Output()
+	utils.Check(err, "fatal")
+
+	return true, nil
+}
 
 func SnapShotsHandler(w http.ResponseWriter, r *http.Request) {
 

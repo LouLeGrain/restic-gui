@@ -25,3 +25,11 @@
 .left-list {
     margin-bottom: 1em;
 }
+
+#show-restore, #rest-spinner {
+    display: none;
+}
+
+#show-restore{
+    cursor: pointer;
+}

@@ -34,6 +34,7 @@ func main() {
 	r.HandleFunc("/api/snapshots/{backup_id}", middleware.Chain(SnapShotsHandler, middleware.Logging())).Methods("GET")
 	r.HandleFunc("/api/snapshots/new/{backup_id}", middleware.Chain(BackupHandler, middleware.Logging())).Methods("GET")
 	r.HandleFunc("/api/snapshots/forget/{backup_id}/{snapshot_id}", middleware.Chain(ForgetHandler, middleware.Logging())).Methods("GET")
+	r.HandleFunc("/api/snapshots/restore/{backup_id}/{snapshot_id}", middleware.Chain(RestoreSnapShotsHandler, middleware.Logging())).Methods("POST")
 	r.HandleFunc("/api/snapshots/prune/{backup_id}", middleware.Chain(PruneHandler, middleware.Logging())).Methods("GET")
 	r.HandleFunc("/api/files/{backup_id}/{snapshot_id}", middleware.Chain(FilesHandler, middleware.Logging())).Methods("GET")
 	r.HandleFunc("/api/backup/new", middleware.Chain(InitBackupHandler, middleware.Logging())).Methods("POST")

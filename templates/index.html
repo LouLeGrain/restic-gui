@@ -51,7 +51,7 @@
                     <div class="col-md-3">Source Location:</div>
                     <div class="col-md-6" id="bu-loc"></div>
                     <div class="col-md-3">
-                            <a href="#" class="badge badge-light" id="bu-change"> Change </a>
+                            <!-- <a href="#" class="badge badge-light" id="bu-change"> Change </a> -->
                     </div>
                 </div>
                 <div class="row">
@@ -71,16 +71,18 @@
             </div>
             <div class="main-view" id="files" style="display:none;">
                 <div class="row">
-                    <div class="col-md-10">
-                        <h6 class="alert alert-success" role="alert"><span id="file-count"></span>
-                            files
-                            for snapshot <span id="sn-id"></span> on
-                            <span id="sn-date"></span>
-                        </h6>
+                  <div class="col-md-9 alert alert-info" role="alert">
+                        <a href="#" id="delete" delete-id="">
+                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                        </a>
+                        <span id="file-count"></span>
+                            files in snapshot <span id="sn-id"></span> on
+                        <span id="sn-date"></span>
                     </div>
-                    <div class="col-md-2">
-                        <h6 class="alert alert-success" role="alert"><a href="#" id="delete" delete-id="">Delete</a>
-                        </h6>
+                    <div class="col-md-3">
+                        <button type="button" id="show-restore" class="btn btn-light btn-small alert alert-info" data-toggle="modal" data-target="#restModal">
+                            Restore selection
+                        </button>
                     </div>
                 </div>
                 <div class="row">
@@ -205,8 +207,48 @@
     </div>
 </div>
 
-<script type="text/javascript">
+<div class="modal fade" id="restModal" tabindex="-1" role="dialog" aria-labelledby="restModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Restore</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form class="modal-body" id="restForm">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label for="destPath">Restore &quot;<span id="path-desc"></span>&quot; to:</label>
+                            <input type="text" class="form-control" id="destPath" aria-describedby="destPathHelp" placeholder="/Dest/Path">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                            <div class="d-flex justify-content-center">
+                                <div class="spinner-border" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                            </div>
+                        <div class="spinner-border text-primary" role="status" id="rest-spinner">
+                            <span class="sr-only">Loading...</span> Restoring
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="modal-footer">
+                <button type="button" id="restore" class="btn btn-primary">Restore</button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<script type="text/javascript">
+    var prop = '';
+    var rest_path = ''
+    var snid = ''
     $(document).ready(function () {
         $('#save-backup').on('click', function () {
             var xtra = {};
@@ -226,7 +268,6 @@
                 return;
             }
 
-            console.log(data)
             var jqxhr = $.ajax({
                 type: "POST",
                 contentType: 'application/json',
@@ -234,12 +275,16 @@
                 data: JSON.stringify(data),
                 dataType: "json"
             }).done(function (response) {
-                console.log(response)
                 $('#srcModal').modal('hide');
+                window.location.href = "/";
             }).fail(function (jqXHR, textStatus) {
                 alert("Request failed: " + textStatus);
             });
         });
+
+        $('#show-restore').on('click', function () {
+            $('#restModal').show()
+        })
 
         $('#save-repo').on('click', function () {
             var xtra = {};
@@ -280,17 +325,39 @@
             if (typeof fn === "function") fn();
         })
 
-        $('#destModal').modal('handleUpdate')
+        $('#drestModal').modal('handleUpdate')
 
-        $('#destModal').on('shown.bs.modal', function (e) {
-            var repoType = $('#destType option:selected').val() + "DataFields";
-            var fn = window[repoType];
-            if (typeof fn === "function") fn();
+        $('#restModal').on('shown.bs.modal', function (e) {
+            var modal = $(this)
+            $('#path-desc').html(rest_path)
         })
 
-        $('#destModal').on('hidden.bs.modal', function (e) {
-            $('#dest-extra-data').empty();
-        })
+        $('#restore').on('click', function (e) {
+            $('#rest-spinner').show()
+            $('#restore').prop('disabled', true);
+            var filename = rest_path.substring(rest_path.lastIndexOf('/')+1);
+            $.ajax({
+                type: "POST",
+                url: "/api/snapshots/restore/" + prop + "/" + snid,
+                data: '{"path":"' + rest_path + '", "dest":"' + $('#destPath').val() + '", "file":"' + filename + '"}',
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: function (response) {
+                    if (response.status == 200) {
+                        $('#restModal').modal('hide')
+                        console.log(response)
+                    }
+                    $('#destPath').val('')
+                    $('#restore').prop('disabled', false);
+                    $('#tree').jstree("deselect_all");
+                },
+                failure: function (errMsg) {
+                    console.log(errMsg)
+                }
+            });
+        });
+
+        $('#restModal').modal('handleUpdate')
 
         $('#srcModal').on('show.bs.modal', function (e) {
             var modal = $(this)
@@ -321,12 +388,9 @@
             });
         });
 
-        var data = JSON.parse('{{.Data}}');
-
-        var prop = '';
+        var data = JSON.parse('{{.Data}}')
 
         $('#saveNewBackup').on('click', function (e) {
-
             $.ajax({
                 type: "POST",
                 url: "/api/newbackup",
@@ -365,6 +429,9 @@
 
         $('#bu-delete').on('click', function (e) {
             e.preventDefault()
+            $('#message h5').html('Please wait while we are cleaning up.')
+            $('#message h5').addClass('alert-warning')
+            $('#message').show()
             $.ajax({
                 type: "POST",
                 url: "/api/backup/delete/" + prop,
@@ -374,10 +441,15 @@
                 success: function (data) {
                     if (data.status == 200) {
                         $('#backup').hide()
-                        $('#message h5').html('Repository refreshed')
+                        $('#message h5').html('All backups deleted')
+                        $('#message h5').removeClass('alert-warning')
                         $('#message h5').addClass('alert-success')
                         $('#message').show()
                         $('#message').delay(2000).fadeOut("slow");
+                        window.setTimeout(function(){
+                            // Move to a new location or you can do something else
+                            window.location.href = "/";
+                        }, 2000);
                     }
                 }
             })
@@ -407,8 +479,10 @@
 
         $(".snapshots").on('click', '.snapshot', (function (e) {
             e.preventDefault()
+            $('#show-restore').hide()
+            rest_path = ''
             $('.alert-danger').hide()
-            var snid = $(this).attr('id')
+            snid = $(this).attr('id')
             $('.snapshot').removeClass('list-group-item-primary')
             $(this).addClass('list-group-item-primary')
             var date = $('#' + snid).html()
@@ -442,9 +516,9 @@
                                 "types", "wholerow"
                             ]
                         })
+                        $('#tree').jstree("deselect_all");
                         $('#tree').jstree(true).settings.core.data = data.data;
                         $('#tree').jstree(true).refresh();
-
                     } else {
                         $('.alert-danger').show()
                         $('.alert-success').hide()
@@ -456,6 +530,15 @@
                 }
             });
         }))
+
+        $('#tree').on("changed.jstree", function (e, data) {
+            if(data.selected[0] != undefined){
+                rest_path = JSON.parse(data.node.original.li_attr).path
+                if(rest_path != ''){
+                    $('#show-restore').show()
+                }
+            }
+        });
 
         $('.new-bu').click(function (e) {
             createBackup($(this).attr('backup-id'))

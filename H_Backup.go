@@ -54,6 +54,25 @@ func RunBackup(id int) (bool, error) {
 	return NewBackup(opt)
 }
 
+func NewBackup(opt map[string]string) (bool, error) {
+	var ret = false
+	var l string
+	var cmd = "restic backup " + opt["path"]
+	out, err := exec.Command("bash", "-c", cmd).Output()
+	utils.Check(err, "fatal")
+	scanner := bufio.NewScanner(strings.NewReader(string(out)))
+	for scanner.Scan() {
+		l = scanner.Text()
+	}
+
+	fields := strings.Fields(l)
+	if len(fields) == 3 && fields[2] == "saved" {
+		ret = true
+	}
+
+	return ret, err
+}
+
 func DeleteBackupHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	response := JsonResponse{200, nil}
@@ -61,7 +80,7 @@ func DeleteBackupHandler(w http.ResponseWriter, r *http.Request) {
 
 	id, _ := strconv.Atoi(v["backup_id"])
 
-	backup, err := RunBackup(id)
+	backup, err := DelBackup(id)
 	if err != nil {
 		response.Status = 403
 		response.Data = "Bad request"
@@ -73,19 +92,56 @@ func DeleteBackupHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func NewBackup(opt map[string]string) (bool, error) {
+func DelBackup(id int) (bool, error) {
+	credentials, err := models.GetBackupDetails(id)
+	utils.Check(err, "")
+	if err != nil {
+		return false, err
+	}
+	utils.SetEnvVars(credentials)
+	opt := Opt{"path": credentials["source"]}
+	
+	res, err := RemoveBackup(opt)
+	err = models.DelBackup(id)
+	utils.Check(err, "")
+	if err != nil {
+		return false, err
+	}
+	return res, err 
+}
+
+func RemoveBackup(opt map[string]string) (bool, error) {
 	var ret = false
 	var l string
-	var cmd = "restic backup " + opt["path"]
+	var i int = 0
+	var cmd = "restic forget --keep-last 1 --path " + opt["path"]
 	out, err := exec.Command("bash", "-c", cmd).Output()
-	//utils.Check(err, "fatal")
+	utils.Check(err, "fatal")
+	
+	cmd = "restic snapshots --path " + opt["path"]
+	out, err = exec.Command("bash", "-c", cmd).Output()
+	utils.Check(err, "fatal")
 	scanner := bufio.NewScanner(strings.NewReader(string(out)))
 	for scanner.Scan() {
 		l = scanner.Text()
+		i++
+		if i == 3 {
+			break
+		}
 	}
-
 	fields := strings.Fields(l)
-	if len(fields) == 3 && fields[2] == "saved" {
+	if len(fields[0]) > 8 {
+		return true, err
+	}
+	cmd = "restic forget  " + fields[0]
+	out, err = exec.Command("bash", "-c", cmd).Output()
+	utils.Check(err, "fatal")
+	scanner = bufio.NewScanner(strings.NewReader(string(out)))
+	for scanner.Scan() {
+		l = scanner.Text()
+	}
+	fields = strings.Fields(l)
+	if len(fields) == 3 && fields[0] == "removed" {
 		ret = true
 	}
 

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"simbookee/restic-gui/utils"
 	"strconv"
+	"fmt"
 )
 
 type BackupData struct {
@@ -104,4 +105,15 @@ func AddBackup(buData BackupData) (int, error) {
 	utils.Check(err, "")
 
 	return int(repoId), nil
+}
+
+func DelBackup(id int) (error) {
+	sql := "DELETE FROM backups WHERE backup_id = ?;"
+	stmt, err := Db.Prepare(sql)
+	utils.Check(err, "")
+	res, err := stmt.Exec(id)
+	utils.Check(err, "")
+	fmt.Printf("%s", res)
+
+	return err
 }

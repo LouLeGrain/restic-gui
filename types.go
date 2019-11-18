@@ -27,6 +27,12 @@ type Row struct {
 	Path     string `json:"path"`
 }
 
+type RestorePost struct {
+	Path 	 string `json:"path"`
+	Dest 	 string `json:"dest"`
+	File 	 string `json:"file"`
+}
+
 type Rows []Row
 
 type Files []string
