@@ -345,11 +345,16 @@
                 success: function (response) {
                     if (response.status == 200) {
                         $('#restModal').modal('hide')
-                        console.log(response)
                     }
                     $('#destPath').val('')
                     $('#restore').prop('disabled', false);
                     $('#tree').jstree("deselect_all");
+
+                    $('#message h5').html('Selected files restored')
+                    $('#message h5').addClass('alert-success')
+                    $('#message').show()
+                    showDeatils()
+                    $('#message').delay(2000).fadeOut("slow");
                 },
                 failure: function (errMsg) {
                     console.log(errMsg)
