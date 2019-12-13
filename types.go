@@ -1,6 +1,6 @@
 package main
 
-import "simbookee/restic-gui/models"
+import "rest/models"
 
 type PageData struct {
 	Title   string

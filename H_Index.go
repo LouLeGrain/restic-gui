@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"simbookee/restic-gui/models"
-	"simbookee/restic-gui/utils"
+	"rest/models"
+	"rest/utils"
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {

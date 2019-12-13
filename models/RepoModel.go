@@ -1,7 +1,7 @@
 package models
 
 import (
-	"simbookee/restic-gui/utils"
+	"rest/utils"
 )
 
 type Repository struct {

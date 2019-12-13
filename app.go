@@ -7,9 +7,9 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"simbookee/restic-gui/middleware"
-	"simbookee/restic-gui/models"
-	"simbookee/restic-gui/utils"
+	"rest/middleware"
+	"rest/models"
+	"rest/utils"
 )
 
 const PORT = "8008"

@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"simbookee/restic-gui/models"
-	"simbookee/restic-gui/utils"
+	"rest/models"
+	"rest/utils"
 	"strconv"
 )
 

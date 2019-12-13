@@ -5,7 +5,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"os"
-	"simbookee/restic-gui/utils"
+	"rest/utils"
 )
 
 const DB_PATH = "backups.db"

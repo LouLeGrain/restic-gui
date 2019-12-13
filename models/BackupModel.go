@@ -3,7 +3,7 @@ package models
 import (
 	"database/sql"
 	"errors"
-	"simbookee/restic-gui/utils"
+	"rest/utils"
 	"strconv"
 	"fmt"
 )
