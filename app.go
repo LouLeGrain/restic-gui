@@ -7,19 +7,21 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"simbookee/restic-gui/middleware"
-	"simbookee/restic-gui/models"
-	"simbookee/restic-gui/utils"
+	"restic-gui/middleware"
+	"restic-gui/models"
+	"restic-gui/utils"
 )
 
 const PORT = "8008"
-
 const DB_TYPE = "sqlite"
 
 func main() {
-	//init bd
-	_, err := models.GetDb(DB_TYPE)
+
+	_, err := utils.Init()
 	utils.Check(err, "fatal")
+	//init bd
+	_, err1 := models.GetDb(DB_TYPE)
+	utils.Check(err1, "fatal")
 
 	//setup router
 	r := mux.NewRouter()

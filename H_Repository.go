@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"simbookee/restic-gui/models"
-	"simbookee/restic-gui/utils"
+	"restic-gui/models"
+	"restic-gui/utils"
 )
 
 type RepoDataStruct struct {
