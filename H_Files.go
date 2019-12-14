@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"rest/models"
-	"rest/utils"
+	"restic-gui/models"
+	"restic-gui/utils"
 	"strconv"
 	"strings"
 )

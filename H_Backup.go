@@ -6,8 +6,8 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"os/exec"
-	"rest/models"
-	"rest/utils"
+	"restic-gui/models"
+	"restic-gui/utils"
 	"strconv"
 	"strings"
 )

@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"rest/models"
-	"rest/utils"
+	"restic-gui/models"
+	"restic-gui/utils"
 )
 
 type RepoDataStruct struct {

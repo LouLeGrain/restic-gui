@@ -3,7 +3,7 @@ package models
 import (
 	"database/sql"
 	"errors"
-	"rest/utils"
+	"restic-gui/utils"
 	"strconv"
 	"fmt"
 )

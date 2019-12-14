@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"restic-gui/utils"
 )
 
 type Middleware func(http.HandlerFunc) http.HandlerFunc
@@ -19,7 +20,7 @@ func Logging() Middleware {
 		return func(w http.ResponseWriter, r *http.Request) {
 			// Do middleware things
 			start := time.Now()
-			logFile, err := os.OpenFile("./data/access.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+			logFile, err := os.OpenFile(utils.GetDataPath() + "access.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 			if err != nil {
 				log.Fatalf("error opening file: %v", err)
 			}

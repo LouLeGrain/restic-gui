@@ -1,4 +1,4 @@
-module rest
+module restic-gui
 
 go 1.13
 

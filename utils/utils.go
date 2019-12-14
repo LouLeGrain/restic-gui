@@ -12,10 +12,26 @@ import (
 	"unicode"
 )
 
+func GetDataPath() string {
+	path := os.Getenv("HOME")
+
+	return path + "/.restic-gui/"
+}
+
+func Init() (bool, error) {
+	ret := true
+	err := os.MkdirAll(GetDataPath(), os.ModePerm)
+	if err != nil {
+		fmt.Println("Cannot create hidden directory.") 
+		ret = false
+	}
+
+	return ret, err
+}
+
 func CompileCommand(data map[string]string) (string, error) {
-
 	var command string = "restic "
-
+	
 	return command, nil
 }
 
@@ -26,6 +42,7 @@ func SetFile(path string, content string) (string, error) {
 	_, err = f.Write([]byte(content))
 	f.Sync()
 	filePath, _ := filepath.Abs(path)
+	
 	return filePath, err
 }
 
@@ -36,6 +53,7 @@ func CheckProgExists(name string) (bool, error) {
 		fmt.Printf("didn't find '" + name + "' executable\n")
 		ret = false
 	}
+	
 	return ret, err
 }
 
@@ -52,17 +70,17 @@ func getPath() (string) {
 
 func Check(err error, typ string) error {
 	if err != nil {
-		logFile, err := os.OpenFile(getPath()+"/data/error.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 		if err != nil {
+			logFile, err := os.OpenFile(GetDataPath() + "error.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 			log.Fatalf("error opening file: %v", err)
+			defer logFile.Close()
+			log.SetOutput(logFile)
+			log.Println(err)
 		}
-		defer logFile.Close()
-		log.SetOutput(logFile)
-		log.Println(err)
-
 		if typ == "fatal" {
 			panic(err)
 		}
+		
 		return err
 	}
 
@@ -77,12 +95,14 @@ func CheckFileExists(path string) (bool, error) {
 	if os.IsNotExist(err) {
 		return false, nil
 	}
+
 	return true, err
 }
 
 func GetMD5Hash(text string) string {
 	hasher := md5.New()
 	hasher.Write([]byte(text))
+	
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
@@ -90,6 +110,7 @@ func UcFirst(str string) string {
 	for i, v := range str {
 		return string(unicode.ToUpper(v)) + str[i+1:]
 	}
+	
 	return ""
 }
 
@@ -97,6 +118,7 @@ func LcFirst(str string) string {
 	for i, v := range str {
 		return string(unicode.ToLower(v)) + str[i+1:]
 	}
+	
 	return ""
 }
 
@@ -111,12 +133,12 @@ func SliceIndex(f []string, t string) int {
 			return i
 		}
 	}
+	
 	return -1
 }
 
 func OpenBrowser(url string) {
 	var err error
-
 	switch runtime.GOOS {
 	case "linux":
 		err = exec.Command("xdg-open", url).Run()
@@ -130,5 +152,4 @@ func OpenBrowser(url string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }

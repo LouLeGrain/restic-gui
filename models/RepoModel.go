@@ -1,7 +1,7 @@
 package models
 
 import (
-	"rest/utils"
+	"restic-gui/utils"
 )
 
 type Repository struct {

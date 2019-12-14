@@ -3,8 +3,8 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"rest/models"
-	"rest/utils"
+	"restic-gui/models"
+	"restic-gui/utils"
 )
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
