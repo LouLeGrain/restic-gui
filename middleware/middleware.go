@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"restic-gui/utils"
 )
 
 type Middleware func(http.HandlerFunc) http.HandlerFunc
@@ -14,20 +15,17 @@ func Logging() Middleware {
 
 	// Create a new Middleware
 	return func(f http.HandlerFunc) http.HandlerFunc {
-
 		// Define the http.HandlerFunc
 		return func(w http.ResponseWriter, r *http.Request) {
 			// Do middleware things
 			start := time.Now()
-			logFile, err := os.OpenFile("./data/access.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+			logFile, err := os.OpenFile(utils.GetDataPath() + "access.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 			if err != nil {
 				log.Fatalf("error opening file: %v", err)
 			}
 			defer logFile.Close()
-
 			log.SetOutput(logFile)
 			log.Println(r.URL.Path, time.Since(start))
-
 			// Call the next middleware/handler in chain
 			f(w, r)
 		}

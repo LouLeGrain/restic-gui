@@ -115,7 +115,7 @@
                         <div class="form-group">
                             <label for="destName">Repository Name</label>
                             <input type="text" class="form-control" id="destName" aria-describedby="destNameHelp"
-                                   placeholder="Name">
+                                   placeholder="Name" required>
                             <small id="destNameHelp" class="form-text text-muted">Please choose for easy
                                 identifiction.
                             </small>
@@ -140,12 +140,13 @@
                         <div class="form-group">
                             <label for="destPasswd">Repository Password</label>
                             <input type="text" class="form-control" id="destPasswd" aria-describedby="destPasswdHelp"
-                                   placeholder="Password">
+                                   placeholder="Password" required>
                         </div>
                     </div>
                 </div>
                 <div id="dest-extra-data"></div>
             </form>
+            <script>$("form").validate()</script>
             <div class="modal-footer">
                 <button type="button" id="save-repo" class="btn btn-primary">Save changes</button>
             </div>
@@ -177,7 +178,7 @@
                         <div class="form-group">
                             <label for="src">Backup Source Folder</label>
                             <input type="text" class="form-control" id="src" aria-describedby="srcHelp"
-                                   placeholder="Source Path">
+                                   placeholder="/Source/Path">
                         </div>
                     </div>
                 </div>
@@ -251,6 +252,20 @@
     var snid = ''
     $(document).ready(function () {
         $('#save-backup').on('click', function () {
+            var valid = true
+            $('#srcForm input').each(function () {
+
+                console.log($(this).attr('id'))
+                console.log($(this).val())
+
+                if($(this).val() == ""){
+                    valid = false
+                }
+            })
+            if(!valid){
+                alert("Please fill in all fields");
+                return
+            }
             var xtra = {};
             $('#src-extra-data input').each(function () {
                 xtra[this.id] = $(this).val()
@@ -262,11 +277,6 @@
                 buNow: $('#backupNow:checked').length > 0,
                 data: xtra
             };
-
-            if (!validateBackup()) {
-                alert("Please fill in all fields");
-                return;
-            }
 
             var jqxhr = $.ajax({
                 type: "POST",
@@ -287,6 +297,17 @@
         })
 
         $('#save-repo').on('click', function () {
+            var valid = true
+            $('#destForm input').each(function () {
+                if($(this).val() == ""){
+                    valid = false
+                }
+            })
+            if(!valid){
+                alert("Please fill in all fields");
+                return;
+            }
+
             var xtra = {};
             $('#dest-extra-data input').each(function () {
                 xtra[this.id] = $(this).val()
@@ -299,11 +320,6 @@
                 Data: xtra
             };
 
-            if (!validateRepo()) {
-                alert("Please fill in all fields");
-                return;
-            }
-
             var jqxhr = $.ajax({
                 type: "POST",
                 contentType: 'application/json',
@@ -311,8 +327,10 @@
                 data: JSON.stringify(data),
                 dataType: "json"
             }).done(function (response) {
+                $('input').each(function () {
+                    $(this).val("")
+                })
                 $('#destModal').modal('hide');
-
             }).fail(function (jqXHR, textStatus) {
                 alert("Request failed: " + textStatus);
             });
@@ -333,6 +351,16 @@
         })
 
         $('#restore').on('click', function (e) {
+            var valid = true
+            $('#restForm input').each(function () {
+                if($(this).val() == ""){
+                    valid = false
+                }
+            })
+            if(!valid){
+                alert("Please fill in all fields");
+                return
+            }
             $('#rest-spinner').show()
             $('#restore').prop('disabled', true);
             var filename = rest_path.substring(rest_path.lastIndexOf('/')+1);
@@ -434,30 +462,33 @@
 
         $('#bu-delete').on('click', function (e) {
             e.preventDefault()
-            $('#message h5').html('Please wait while we are cleaning up.')
-            $('#message h5').addClass('alert-warning')
-            $('#message').show()
-            $.ajax({
-                type: "POST",
-                url: "/api/backup/delete/" + prop,
-                // The key needs to match your method's input parameter (case-sensitive).
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                success: function (data) {
-                    if (data.status == 200) {
-                        $('#backup').hide()
-                        $('#message h5').html('All backups deleted')
-                        $('#message h5').removeClass('alert-warning')
-                        $('#message h5').addClass('alert-success')
-                        $('#message').show()
-                        $('#message').delay(2000).fadeOut("slow");
-                        window.setTimeout(function(){
-                            // Move to a new location or you can do something else
-                            window.location.href = "/";
-                        }, 2000);
+            var result = confirm("Are you shure to delete this backup with all snapshots?");
+            if(result){
+                $('#message h5').html('Please wait while we are cleaning up.')
+                $('#message h5').addClass('alert-warning')
+                $('#message').show()
+                $.ajax({
+                    type: "POST",
+                    url: "/api/backup/delete/" + prop,
+                    // The key needs to match your method's input parameter (case-sensitive).
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data) {
+                        if (data.status == 200) {
+                            $('#backup').hide()
+                            $('#message h5').html('All snapshots and backup deleted')
+                            $('#message h5').removeClass('alert-warning')
+                            $('#message h5').addClass('alert-success')
+                            $('#message').show()
+                            $('#message').delay(2000).fadeOut("slow");
+                            window.setTimeout(function(){
+                                // Move to a new location or you can do something else
+                                window.location.href = "/";
+                            }, 2000);
+                        }
                     }
-                }
-            })
+                })
+            }
         })
 
         $('#delete').on('click', function (e) {
@@ -641,6 +672,11 @@
             });
             return true
         }
+    
+        var repoType = $('#destType option:selected').val() + "DataFields";
+        var fn = window[repoType];
+        if (typeof fn === "function") fn();
+    
     })
 
 </script>

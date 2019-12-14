@@ -5,7 +5,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"log"
 	"os"
-	"simbookee/restic-gui/utils"
+	"restic-gui/utils"
 )
 
 const DB_PATH = "backups.db"
@@ -24,7 +24,7 @@ func GetDb(t string) (bool, error) {
 }
 
 func getDbPath() string {
-	return "./data/" + DB_PATH
+	return utils.GetDataPath() + DB_PATH
 }
 
 func sqliteConnect() (bool, error) {
